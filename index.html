@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raveone Emailer | Professional Marketing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <style>
+        :root {
+            --odoo-purple: #714B67;
+            --odoo-teal: #017E84;
+            --odoo-bg: #f0f2f5;
+        }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--odoo-bg); color: #4c4c4c; margin: 0; }
+        
+        .top-nav { background-color: var(--odoo-purple); height: 46px; display: flex; align-items: center; padding: 0 15px; color: white; position: sticky; top: 0; z-index: 50; }
+        .nav-link { padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; opacity: 0.8; }
+        .nav-link:hover { opacity: 1; background: rgba(0,0,0,0.1); }
+        .nav-link.active { font-weight: bold; opacity: 1; border-bottom-color: var(--odoo-teal); background-color: rgba(0,0,0,0.1); }
+        
+        .sub-nav { background-color: white; border-bottom: 1px solid #dee2e6; height: 44px; display: flex; align-items: center; padding: 0 20px; }
+        
+        .odoo-card { background: white; border-radius: 4px; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .odoo-btn-primary { background-color: var(--odoo-purple); color: white; padding: 6px 14px; border-radius: 3px; font-weight: 500; font-size: 12px; transition: all 0.2s; }
+        .odoo-btn-primary:hover { opacity: 0.9; }
+        .odoo-btn-secondary { background-color: var(--odoo-teal); color: white; padding: 6px 14px; border-radius: 3px; font-weight: 500; font-size: 12px; }
+        .odoo-btn-ai { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; padding: 6px 14px; border-radius: 3px; font-weight: 600; font-size: 12px; transition: transform 0.2s; }
+        
+        .page-view { display: none; padding: 20px; max-width: 1600px; margin: 0 auto; }
+        .page-view.active { display: block; }
+
+        .editor-container { border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; height: 600px; background: white; display: flex; flex-direction: column; }
+        #editor, #templateEditor { flex-grow: 1; border: none !important; }
+        .ql-toolbar { border: none !important; border-bottom: 1px solid #eee !important; background: #f8f9fa; }
+        
+        .metric-label { font-size: 10px; font-weight: bold; color: #adb5bd; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 24px; font-weight: 700; color: #495057; }
+        
+        .odoo-table thead { background: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+        .odoo-table th { padding: 10px 15px; font-size: 11px; text-transform: uppercase; color: #666; font-weight: bold; }
+        .odoo-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; }
+        
+        .tag-pill { display: inline-block; background: #e7f3ff; color: #0061bd; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 4px; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; width: 280px; z-index: 1000; margin-top: 4px; }
+        .dropdown-menu.show { display: block; }
+        .nav-logo { height: 24px; width: auto; margin-right: 12px; border-radius: 2px; }
+        
+        #aiModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+        #aiModal.show { display: flex; }
+        .loading-dots:after { content: ' .'; animation: dots 1s steps(5, end) infinite; }
+        @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); } 40% { color: #714B67; } }
+
+        .config-group { border-left: 3px solid #dee2e6; padding-left: 15px; margin-bottom: 25px; }
+        .config-label { font-weight: bold; font-size: 13px; color: #333; display: block; margin-bottom: 5px; }
+        .config-desc { font-size: 11px; color: #888; margin-bottom: 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <header class="top-nav">
+        <div class="flex items-center h-full w-full">
+            <div class="text-md font-bold mr-8 flex items-center">
+                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_200_200/B56ZU2_QxhHEAM-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=lB1EaAdg4Jwoj7MnO_Gsy9HmVrascy0YTLkTN2ndvUg" alt="Raveone" class="nav-logo">
+                Raveone Emailer
+            </div>
+            <nav class="flex h-full">
+                <div onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-link active">Dashboard</div>
+                <div onclick="switchPage('campaigns')" id="nav-campaigns" class="nav-link">Mailings</div>
+                <div onclick="switchPage('templates')" id="nav-templates" class="nav-link">Templates</div>
+                <div onclick="switchPage('contacts')" id="nav-contacts" class="nav-link">Contacts</div>
+                <div onclick="switchPage('settings')" id="nav-settings" class="nav-link">Configuration</div>
+            </nav>
+            <div class="ml-auto flex items-center space-x-4">
+                <input id="gasUrl" type="password" placeholder="Apps Script URL" class="text-xs text-black border-none px-3 py-1 rounded w-48 outline-none">
+                <button onclick="fetchStats()" class="bg-teal-600 px-3 py-1 rounded text-xs font-bold shadow-md">Sync Data</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="sub-nav text-sm">
+        <div class="font-bold text-gray-600">Email Marketing</div>
+        <div class="mx-2 text-gray-300">/</div>
+        <div id="breadcrumb-active" class="text-gray-400 font-medium">Dashboard</div>
+    </div>
+
+    <main class="flex-grow overflow-y-auto">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="page-view active">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="odoo-card p-5">
+                    <div class="metric-label">Total Audience</div>
+                    <div id="statContacts" class="metric-value">0</div>
+                    <div class="text-[10px] text-teal-600 font-bold mt-1">Enterprise Capacity: 50,000</div>
+                </div>
+                <div class="odoo-card p-5">
+                    <div class="metric-label">Daily Workspace Quota</div>
+                    <div id="statQuota" class="metric-value">0</div>
+                    <div class="text-[10px] text-gray-400 font-bold mt-1">Remaining Units</div>
+                </div>
+                <div class="odoo-card p-5">
+                    <div class="metric-label">Active Drip Flows</div>
+                    <div id="statActive" class="metric-value">0</div>
+                    <div class="text-[10px] text-purple-600 font-bold mt-1">Multi-Campaign Active</div>
+                </div>
+                <div class="odoo-card p-5">
+                    <div class="metric-label">Clean List Health</div>
+                    <div class="metric-value text-teal-600">99.9%</div>
+                    <button onclick="validateAudience()" class="text-[9px] font-bold text-teal-600 underline">RUN VALIDATOR</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8">
+                    <div class="odoo-card">
+                        <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wider">Live Campaign Pulse</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full odoo-table">
+                                <thead>
+                                    <tr><th>Mailing Name</th><th>Target</th><th>Goal</th><th>Status</th></tr>
+                                </thead>
+                                <tbody id="dash-queue-list">
+                                    <tr><td colspan="4" class="p-8 text-center text-gray-400 italic">No campaigns are currently processing.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-4">
+                    <div class="odoo-card p-5 h-full min-h-[300px] flex flex-col">
+                        <h3 class="font-bold text-gray-700 uppercase text-[10px] mb-4 border-b pb-2">Operational Chatter</h3>
+                        <div id="logs" class="text-[10px] font-mono space-y-2 overflow-y-auto flex-grow bg-slate-50 p-2 rounded">
+                            > Raveone Emailer Initialized.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CAMPAIGNS VIEW -->
+        <section id="view-campaigns" class="page-view">
+            <div class="mb-4 flex space-x-2">
+                <button onclick="openWizard()" class="odoo-btn-primary font-bold"><i class="fas fa-plus mr-1"></i> NEW CAMPAIGN</button>
+                <button onclick="fetchCampaigns()" class="bg-white border px-3 py-1 rounded text-xs shadow-sm font-medium">REFRESH LIST</button>
+            </div>
+            <div class="odoo-card overflow-hidden shadow-lg">
+                <table class="w-full odoo-table">
+                    <thead>
+                        <tr><th>Mailing Name</th><th>Subject</th><th>Audience</th><th>Limit</th><th>Status</th><th class="text-right">Action</th></tr>
+                    </thead>
+                    <tbody id="campaign-list"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TEMPLATE LIBRARY VIEW -->
+        <section id="view-templates" class="page-view">
+            <div class="mb-4 flex space-x-2">
+                <button onclick="createNewTemplate()" class="odoo-btn-primary font-bold"><i class="fas fa-plus mr-1"></i> NEW TEMPLATE</button>
+            </div>
+            <div class="odoo-card overflow-hidden shadow-lg">
+                <table class="w-full odoo-table">
+                    <thead>
+                        <tr><th>Template Name</th><th>Default Subject</th><th>Style</th><th class="text-right">Action</th></tr>
+                    </thead>
+                    <tbody id="template-list-body">
+                        <!-- Dynamic list -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- CAMPAIGN WIZARD -->
+        <section id="view-wizard" class="page-view">
+            <div class="mb-4 flex justify-between">
+                <div class="flex space-x-2">
+                    <button onclick="saveCampaign()" class="odoo-btn-primary font-bold">SAVE MAILING</button>
+                    <button onclick="switchPage('campaigns')" class="bg-white border px-4 py-1.5 rounded text-xs">DISCARD</button>
+                </div>
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <button onclick="toggleTemplateMenu()" class="odoo-btn-secondary font-bold shadow-sm"><i class="fas fa-layer-group mr-2"></i> LOAD FROM LIBRARY <i class="fas fa-caret-down ml-1"></i></button>
+                        <div id="templateMenu" class="dropdown-menu odoo-card shadow-2xl p-4">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Branded Layouts</p>
+                            <div id="template-dropdown-list" class="space-y-1">
+                                <!-- Loaded from library -->
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="generateAISubject()" class="odoo-btn-ai shadow-sm"><i class="fas fa-sparkles mr-2"></i> ✨ AI SUBJECT</button>
+                </div>
+            </div>
+            <div class="odoo-card p-10 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8 border-b pb-8">
+                    <div class="space-y-6">
+                        <input id="campName" type="text" placeholder="Internal Campaign Name" class="text-2xl font-bold w-full border-b border-transparent focus:border-purple-300 outline-none">
+                        <input id="subA" type="text" placeholder="Email Subject Line" class="w-full border-b p-2 outline-none focus:border-teal-500 font-medium text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Target Segment</label>
+                            <select id="tagSelect" class="w-full border-b p-2 outline-none bg-white text-sm">
+                                <option value="">Full Database</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Daily Batch Size</label>
+                            <input id="campLimit" type="number" value="300" class="w-full border-b p-2 outline-none text-sm font-bold">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">Visual Designer</span>
+                        <div class="flex space-x-4 items-center">
+                            <button onclick="refineAIContent()" class="odoo-btn-ai text-[10px]"><i class="fas fa-magic mr-1"></i> ✨ AI REWRITE</button>
+                            <span class="text-[10px] text-gray-400 font-medium">Fields:</span>
+                            <button onclick="insertTag('{Name}')" class="text-[10px] font-bold text-teal-600 hover:underline">{Name}</button>
+                            <button onclick="insertTag('{Business}')" class="text-[10px] font-bold text-teal-600 hover:underline">{Business}</button>
+                            <button onclick="insertTag('{City}')" class="text-[10px] font-bold text-teal-600 hover:underline">{City}</button>
+                        </div>
+                    </div>
+                    <div class="editor-container odoo-card shadow-inner">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TEMPLATE EDITOR -->
+        <section id="view-template-wizard" class="page-view">
+            <div class="mb-4 flex justify-between">
+                <div class="flex space-x-2">
+                    <button onclick="saveTemplateToLibrary()" class="odoo-btn-primary font-bold">SAVE TO LIBRARY</button>
+                    <button onclick="switchPage('templates')" class="bg-white border px-4 py-1.5 rounded text-xs">DISCARD</button>
+                </div>
+            </div>
+            <div class="odoo-card p-10 shadow-xl">
+                <div class="mb-8 border-b pb-8">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Template Identity</label>
+                            <input id="tempName" type="text" placeholder="e.g. Monthly Newsletter" class="text-2xl font-bold w-full border-b border-transparent focus:border-purple-300 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Default Subject</label>
+                            <input id="tempSubject" type="text" placeholder="Updates for {Business}..." class="w-full border-b p-2 outline-none text-sm font-medium">
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-container odoo-card shadow-inner">
+                    <div id="templateEditor"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACTS VIEW -->
+        <section id="view-contacts" class="page-view">
+            <div class="mb-4 flex justify-between items-center">
+                <div class="flex space-x-2">
+                    <button class="odoo-btn-primary">NEW LEAD</button>
+                    <button class="odoo-btn-secondary">IMPORT SPREADSHEET</button>
+                </div>
+                <div class="text-xs text-gray-400 font-bold uppercase">50,000 Lead Database</div>
+            </div>
+            <div class="odoo-card overflow-hidden shadow-lg">
+                <table class="w-full odoo-table">
+                    <thead><tr><th>Email</th><th>Name</th><th>Phone</th><th>City</th><th>Segments</th><th>Status</th></tr></thead>
+                    <tbody id="contact-list"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SETTINGS VIEW (Comprehensive Config) -->
+        <section id="view-settings" class="page-view">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- Branding & ID -->
+                <div class="odoo-card p-8">
+                    <h3 class="config-section-title" style="color: var(--odoo-purple); font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">1. IDENTIFICATION & BRANDING</h3>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <label class="config-label">Default Sender Display Name</label>
+                            <input type="text" value="Rajesh K Rao | Raveone" class="w-full border-b p-2 outline-none text-sm focus:border-purple-300">
+                            <p class="config-desc">The name recipients see in their inbox.</p>
+                        </div>
+                        <div>
+                            <label class="config-label">Official Reply-To Address</label>
+                            <input type="text" value="rajesh@raveone.in" class="w-full border-b p-2 outline-none text-sm focus:border-purple-300">
+                            <p class="config-desc">Directs replies to your main inbox.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domain Protection & Anti-Spam -->
+                <div class="odoo-card p-8">
+                    <h3 class="config-section-title" style="color: var(--odoo-teal); font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">2. DOMAIN REPUTATION & ANTI-SPAM</h3>
+                    <div class="space-y-6">
+                        <div class="config-group">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" checked class="rounded text-teal-600">
+                                <span class="config-label">Enable "Workspace Warm-up" Mode</span>
+                            </label>
+                            <p class="config-desc">Automatically starts with 50 emails/day and scales by 20% daily to establish domain trust with Google.</p>
+                        </div>
+                        
+                        <div class="config-group">
+                            <label class="config-label">Anti-Spam Dispatch Delay (Seconds)</label>
+                            <select class="w-48 border-b outline-none text-sm">
+                                <option value="2">2 seconds (Standard)</option>
+                                <option value="5" selected>5 seconds (Recommended for 50k)</option>
+                                <option value="10">10 seconds (Maximum Safety)</option>
+                            </select>
+                            <p class="config-desc">Adds a pause between each email to mimic human-like sending behavior.</p>
+                        </div>
+
+                        <div class="config-group">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" checked class="rounded text-red-600">
+                                <span class="config-label">Strict SPF/DKIM Pre-flight Check</span>
+                            </label>
+                            <p class="config-desc">Prevents sending if Google detects DNS authentication issues that might cause blacklisting.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Policy -->
+                <div class="odoo-card p-8">
+                    <h3 class="config-section-title" style="color: #666; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">3. DATA & PRIVACY POLICY</h3>
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="config-label">Global Drip Velocity</span>
+                                <p class="config-desc">Total emails processed across all active drips per day.</p>
+                            </div>
+                            <input type="number" value="1500" class="w-24 border-b text-center outline-none font-bold text-teal-700">
+                        </div>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" checked class="rounded text-purple-600">
+                            <span class="config-label">Auto-Suppress Non-Respondents after 12 months</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="aiModal">
+        <div class="bg-white p-8 rounded shadow-2xl max-w-lg w-full">
+            <h3 id="aiModalTitle" class="text-lg font-bold mb-4 text-purple-700 flex items-center"></h3>
+            <div id="aiModalContent" class="text-sm text-gray-600 mb-6 leading-relaxed"></div>
+            <div id="aiModalActions" class="flex justify-end space-x-2"></div>
+        </div>
+    </div>
+
+    <script>
+        const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],[{color:[]},{background:[]}],['link','clean']] } });
+        const tQuill = new Quill('#templateEditor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],[{color:[]},{background:[]}],['link','clean']] } });
+        
+        const API_KEY = "vibe-marketing-2024";
+        const GEMINI_API_KEY = "AIzaSyC3C8sH8yAg-Zo0_rykVUGq38i7KjHRJgA"; 
+        let activeCampaignId = null;
+        let activeTemplateId = null;
+
+        const wrapBrand = (content) => {
+            return `
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; padding: 40px 0; margin: 0;">
+                <table width="600" align="center" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; border-collapse: collapse;">
+                    <!-- HEADER TAGLINE -->
+                    <tr>
+                        <td style="padding: 15px 30px; border-bottom: 1px solid #f0f0f0; text-align: left;">
+                            <span style="font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; letter-spacing: 1.5px;">Partner to MSMEs</span>
+                        </td>
+                    </tr>
+                    <!-- CONTENT AREA -->
+                    <tr>
+                        <td style="padding: 0;">
+                            ${content}
+                        </td>
+                    </tr>
+                    <!-- SIGNATURE FOOTER -->
+                    <tr>
+                        <td style="padding: 40px 30px; background-color: #fafafa; border-top: 1px solid #eeeeee;">
+                            <table width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 15px; color: #333; font-weight: bold;">Rajesh K Rao</div>
+                                        <div style="font-size: 11px; color: #777; margin: 2px 0;">Founder and CEO | Raveone Consultants</div>
+                                        <div style="font-size: 11px; color: #777;">+91 9148330565 | <a href="https://www.raveone.in" style="color: #017E84; text-decoration: none;">www.raveone.in</a></div>
+                                        <div style="margin-top: 15px; font-size: 9px; color: #bbb;">#32, 3rd Main, Vinayaka Layout, Nagarbhavi, Bangalore – 560072</div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; text-align: center;">
+                                <p style="font-size: 10px; color: #999;">No longer wish to receive these insights? <a href="#" style="color: #714B67; text-decoration: underline;">Unsubscribe instantly</a></p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>`;
+        };
+
+        const templates = [
+            { 
+                id: 't_newsletter', 
+                name: '1. Dynamic Newsletter', 
+                subject: 'Raveone Insights: Driving growth for {Business}', 
+                content: `
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr><td style="padding: 0;"><img src="https://via.placeholder.com/600x250?text=Monthly+MSME+Insights" width="600" style="display:block; width: 100%;"></td></tr>
+                    <tr><td style="padding: 30px;">
+                        <h1 style="color: #714B67; font-size: 24px; margin-bottom: 20px;">Hello {Name},</h1>
+                        <p style="font-size: 14px; line-height: 1.6; color: #555;">Welcome to this month's recruitment and strategy update. At <strong>{Business}</strong>, we know that people are the heart of every operation in {City}.</p>
+                        <h3 style="color: #017E84; margin-top: 30px;">🔥 Market Trends You Need to Know</h3>
+                        <p style="font-size: 14px; line-height: 1.6; color: #555;">We are seeing a 15% increase in demand for QMS-certified operations managers...</p>
+                        <div style="margin-top: 30px; text-align: center;">
+                            <a href="https://www.raveone.in" style="background-color: #017E84; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block;">Read Full Insights</a>
+                        </div>
+                    </td></tr>
+                </table>` 
+            },
+            { 
+                id: 't_service', 
+                name: '2. Service Spotlight', 
+                subject: 'Scaling {Business} through Strategic Training', 
+                content: `
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr><td style="padding: 30px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="color: #017E84; font-size: 26px; margin: 0;">Specialized Consulting for {City}</h2>
+                            <p style="color: #999; font-size: 12px; margin-top: 5px;">Drastically improve {Business} outcomes this quarter.</p>
+                        </div>
+                        <img src="https://via.placeholder.com/540x200?text=Consulting+Excellence" width="540" style="border-radius: 8px; margin-bottom: 30px;">
+                        <h3 style="color: #714B67;">Our Core Offerings:</h3>
+                        <ul style="color: #555; font-size: 14px; line-height: 2;">
+                            <li>End-to-End Recruitment Management</li>
+                            <li>Corporate Training & Skill Upgradation</li>
+                            <li>ISO/QMS Implementation Support</li>
+                        </ul>
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px dashed #ddd; margin-top: 30px; text-align: center;">
+                            <p style="margin: 0; font-weight: bold; color: #333;">Ready for a discovery call?</p>
+                            <p style="font-size: 12px; color: #777;">We've helped MSMEs in {City} scale by 30%.</p>
+                            <a href="https://www.raveone.in" style="background-color: #714B67; color: #ffffff; padding: 10px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 15px; display: inline-block;">Book Appointment</a>
+                        </div>
+                    </td></tr>
+                </table>` 
+            },
+            { 
+                id: 't_email', 
+                name: '3. Professional Email', 
+                subject: 'Quick question regarding {Business}', 
+                content: `
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr><td style="padding: 40px 30px;">
+                        <p style="font-size: 15px; color: #333;">Hi {Name},</p>
+                        <p style="font-size: 15px; line-height: 1.5; color: #444;">I've been following the recent growth of <strong>{Business}</strong> in {City} and wanted to reach out regarding your recruitment strategy for the upcoming months.</p>
+                        <p style="font-size: 15px; line-height: 1.5; color: #444;">We've recently helped several partners in your sector streamline their talent acquisition through our proprietary HR framework.</p>
+                        <p style="font-size: 15px; line-height: 1.5; color: #444;">Would you be open to a 5-minute chat next Tuesday?</p>
+                        <p style="font-size: 15px; color: #333; margin-top: 30px;">Best regards,</p>
+                    </td></tr>
+                </table>` 
+            }
+        ];
+
+        function switchPage(id) {
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            const activeNav = document.getElementById('nav-' + id);
+            if(activeNav) activeNav.classList.add('active');
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            const activeView = document.getElementById('view-' + id);
+            if(activeView) activeView.classList.add('active');
+            document.getElementById('breadcrumb-active').innerText = id === 'settings' ? 'Configuration' : (id.charAt(0).toUpperCase() + id.slice(1));
+            if(id === 'templates') renderTemplateList();
+            if(id === 'campaigns') fetchCampaigns();
+            if(id === 'contacts') fetchContacts();
+            if(id === 'dashboard') fetchStats();
+        }
+
+        function renderTemplateList() {
+            const list = document.getElementById('template-list-body');
+            list.innerHTML = templates.map(t => `
+                <tr>
+                    <td class="font-bold text-purple-700">${t.name}</td>
+                    <td>${t.subject}</td>
+                    <td><span class="tag-pill">Visual</span></td>
+                    <td class="text-right">
+                        <button onclick="editTemplate('${t.id}')" class="text-teal-600 font-bold text-xs mr-2">EDIT</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editTemplate(id) {
+            const temp = templates.find(t => t.id === id);
+            if (!temp) return;
+            activeTemplateId = temp.id;
+            document.getElementById('tempName').value = temp.name;
+            document.getElementById('tempSubject').value = temp.subject;
+            tQuill.root.innerHTML = temp.content;
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-template-wizard').classList.add('active');
+        }
+
+        function saveTemplateToLibrary() {
+            const idx = templates.findIndex(t => t.id === activeTemplateId);
+            if (idx > -1) {
+                templates[idx].name = document.getElementById('tempName').value;
+                templates[idx].subject = document.getElementById('tempSubject').value;
+                templates[idx].content = tQuill.root.innerHTML;
+            }
+            switchPage('templates');
+        }
+
+        function toggleTemplateMenu() {
+            const menu = document.getElementById('templateMenu');
+            const list = document.getElementById('template-dropdown-list');
+            list.innerHTML = templates.map(t => `
+                <button onclick="loadTemplateFromLibrary('${t.id}')" class="w-full text-left p-2 hover:bg-purple-50 rounded text-xs border-b last:border-0">${t.name}</button>
+            `).join('');
+            menu.classList.toggle('show');
+        }
+
+        function loadTemplateFromLibrary(id) {
+            const temp = templates.find(t => t.id === id);
+            if(temp && quill) {
+                quill.clipboard.dangerouslyPasteHTML(wrapBrand(temp.content));
+                document.getElementById('subA').value = temp.subject;
+                document.getElementById('campName').value = temp.name;
+            }
+            document.getElementById('templateMenu').classList.remove('show');
+        }
+
+        async function fetchStats() {
+            const url = document.getElementById('gasUrl').value;
+            if(!url) return;
+            try {
+                const res = await fetch(`${url}?key=${API_KEY}&action=getStatus`);
+                const data = await res.json();
+                document.getElementById('statContacts').innerText = data.total.toLocaleString();
+                document.getElementById('statQuota').innerText = data.quota.toLocaleString();
+                document.getElementById('statActive').innerText = data.activeCampaigns;
+            } catch (e) {}
+        }
+
+        async function fetchContacts() {
+            // Simulated contact view with multi-segment support
+            const container = document.getElementById('contact-list');
+            container.innerHTML = `
+                <tr>
+                    <td>client@msme.com</td>
+                    <td>Ravi Kumar</td>
+                    <td>+91 99000...</td>
+                    <td>Bangalore</td>
+                    <td>
+                        <span class="tag-pill">MSME</span>
+                        <span class="tag-pill">Consulting</span>
+                    </td>
+                    <td><span class="status-pill" style="background:#dcfce7; color:#166534;">Verified</span></td>
+                </tr>
+            `;
+        }
+
+        async function fetchCampaigns() {
+            const url = document.getElementById('gasUrl').value;
+            if(!url) return;
+            const res = await fetch(`${url}?key=${API_KEY}&action=getCampaigns`);
+            const list = await res.json();
+            const container = document.getElementById('campaign-list');
+            container.innerHTML = list.map(c => `<tr><td>${c.name}</td><td>${c.subA}</td><td>${c.segment || 'All'}</td><td>${c.limit}</td><td><span class="status-pill status-running">${c.status}</span></td><td class="text-right"><button onclick="openWizard(null)" class="text-teal-600 font-bold text-xs">OPEN</button></td></tr>`).join('');
+        }
+
+        function openWizard(campaign = null) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-wizard').classList.add('active');
+            activeCampaignId = campaign ? campaign.id : null;
+            document.getElementById('campName').value = campaign ? campaign.name : "";
+            document.getElementById('subA').value = campaign ? campaign.subA : "";
+            quill.clipboard.dangerouslyPasteHTML(campaign ? campaign.body : "<p style='text-align:center; color:#999; margin-top:100px;'>Click 'LOAD FROM LIBRARY' to use a visual layout...</p>");
+        }
+
+        async function saveCampaign() {
+            const url = document.getElementById('gasUrl').value;
+            const campaign = { id: activeCampaignId, name: document.getElementById('campName').value, subjectA: document.getElementById('subA').value, segment: document.getElementById('tagSelect').value, limit: document.getElementById('campLimit').value, body: quill.root.innerHTML };
+            await fetch(url, { method: 'POST', body: JSON.stringify({ key: API_KEY, action: 'saveCampaign', campaign: campaign }) });
+            switchPage('campaigns');
+        }
+
+        function insertTag(tag) {
+            const range = quill.getSelection();
+            if (range) quill.insertText(range.index, tag);
+            else quill.clipboard.dangerouslyPasteHTML(quill.getLength(), tag);
+        }
+
+        window.onload = () => {
+            const savedUrl = localStorage.getItem('vibe_url_v4');
+            if(savedUrl) { document.getElementById('gasUrl').value = savedUrl; fetchStats(); }
+            window.addEventListener('click', (e) => { 
+                if (e.target.closest('#templateMenu') === null && !e.target.closest('button')?.onclick?.toString().includes('toggleTemplateMenu')) {
+                    document.getElementById('templateMenu')?.classList.remove('show');
+                }
+            }, true);
+        };
+        document.getElementById('gasUrl').addEventListener('change', (e) => localStorage.setItem('vibe_url_v4', e.target.value));
+    </script>
+</body>
+</html>
