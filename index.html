@@ -26,10 +26,10 @@
         .sub-nav { background-color: white; border-bottom: 1px solid #dee2e6; height: 44px; display: flex; align-items: center; padding: 0 20px; }
         
         .odoo-card { background: white; border-radius: 4px; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .odoo-btn-primary { background-color: var(--odoo-purple); color: white; padding: 6px 14px; border-radius: 3px; font-weight: 500; font-size: 12px; transition: all 0.2s; }
+        .odoo-btn-primary { background-color: var(--odoo-purple); color: white; padding: 6px 14px; border-radius: 3px; font-weight: 500; font-size: 12px; transition: all 0.2s; cursor: pointer; }
         .odoo-btn-primary:hover { opacity: 0.9; }
-        .odoo-btn-secondary { background-color: var(--odoo-teal); color: white; padding: 6px 14px; border-radius: 3px; font-weight: 500; font-size: 12px; }
-        .odoo-btn-ai { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; padding: 6px 14px; border-radius: 3px; font-weight: 600; font-size: 12px; transition: transform 0.2s; }
+        .odoo-btn-secondary { background-color: var(--odoo-teal); color: white; padding: 6px 14px; border-radius: 3px; font-weight: 500; font-size: 12px; cursor: pointer; }
+        .odoo-btn-ai { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; padding: 6px 14px; border-radius: 3px; font-weight: 600; font-size: 12px; transition: transform 0.2s; cursor: pointer; }
         
         .page-view { display: none; padding: 20px; max-width: 1600px; margin: 0 auto; }
         .page-view.active { display: block; }
@@ -45,13 +45,16 @@
         .odoo-table th { padding: 10px 15px; font-size: 11px; text-transform: uppercase; color: #666; font-weight: bold; }
         .odoo-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; }
         
-        .tag-pill { display: inline-block; background: #e7f3ff; color: #0061bd; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 4px; }
+        .status-pill { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; }
+        .status-running { background: #d1ecf1; color: #0c5460; }
+        
+        .tag-pill { display: inline-block; background: #e7f3ff; color: #0061bd; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 4px; margin-bottom: 4px; }
         .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; width: 280px; z-index: 1000; margin-top: 4px; }
         .dropdown-menu.show { display: block; }
         .nav-logo { height: 24px; width: auto; margin-right: 12px; border-radius: 2px; }
         
-        #aiModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
-        #aiModal.show { display: flex; }
+        #aiModal, .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+        #aiModal.show, .custom-modal.show { display: flex; }
         .loading-dots:after { content: ' .'; animation: dots 1s steps(5, end) infinite; }
         @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); } 40% { color: #714B67; } }
 
@@ -76,7 +79,7 @@
                 <div onclick="switchPage('settings')" id="nav-settings" class="nav-link">Configuration</div>
             </nav>
             <div class="ml-auto flex items-center space-x-4">
-                <input id="gasUrl" type="password" placeholder="Apps Script URL" class="text-xs text-black border-none px-3 py-1 rounded w-48 outline-none">
+                <input id="gasUrl" type="password" placeholder="Apps Script URL" class="text-xs text-black border-none px-3 py-1 rounded w-64 outline-none">
                 <button onclick="fetchStats()" class="bg-teal-600 px-3 py-1 rounded text-xs font-bold shadow-md">Sync Data</button>
             </div>
         </div>
@@ -265,15 +268,18 @@
         <section id="view-contacts" class="page-view">
             <div class="mb-4 flex justify-between items-center">
                 <div class="flex space-x-2">
-                    <button class="odoo-btn-primary">NEW LEAD</button>
-                    <button class="odoo-btn-secondary">IMPORT SPREADSHEET</button>
+                    <button onclick="openNewLeadModal()" class="odoo-btn-primary">NEW LEAD</button>
+                    <button onclick="triggerImport()" class="odoo-btn-secondary">IMPORT SPREADSHEET</button>
+                    <button onclick="downloadCSVTemplate()" class="bg-white border border-gray-300 px-3 py-1 rounded text-[10px] font-bold hover:bg-gray-50">CSV TEMPLATE</button>
                 </div>
                 <div class="text-xs text-gray-400 font-bold uppercase">50,000 Lead Database</div>
             </div>
             <div class="odoo-card overflow-hidden shadow-lg">
                 <table class="w-full odoo-table">
-                    <thead><tr><th>Email</th><th>Name</th><th>Phone</th><th>City</th><th>Segments</th><th>Status</th></tr></thead>
-                    <tbody id="contact-list"></tbody>
+                    <thead><tr><th>Email</th><th>Name</th><th>Phone</th><th>City</th><th>Business</th><th>Segments</th><th>Status</th></tr></thead>
+                    <tbody id="contact-list-body">
+                        <!-- Loaded dynamically -->
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -329,28 +335,32 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Data Policy -->
-                <div class="odoo-card p-8">
-                    <h3 class="config-section-title" style="color: #666; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">3. DATA & PRIVACY POLICY</h3>
-                    <div class="space-y-6">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <span class="config-label">Global Drip Velocity</span>
-                                <p class="config-desc">Total emails processed across all active drips per day.</p>
-                            </div>
-                            <input type="number" value="1500" class="w-24 border-b text-center outline-none font-bold text-teal-700">
-                        </div>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" checked class="rounded text-purple-600">
-                            <span class="config-label">Auto-Suppress Non-Respondents after 12 months</span>
-                        </label>
-                    </div>
-                </div>
             </div>
         </section>
 
     </main>
+
+    <!-- NEW LEAD MODAL -->
+    <div id="newLeadModal" class="custom-modal">
+        <div class="bg-white p-8 rounded shadow-2xl max-w-md w-full">
+            <h3 class="text-lg font-bold mb-6 text-purple-700">Add New Lead</h3>
+            <div class="space-y-4">
+                <input id="leadEmail" type="email" placeholder="Email Address" class="w-full border-b p-2 outline-none">
+                <input id="leadName" type="text" placeholder="Full Name" class="w-full border-b p-2 outline-none">
+                <input id="leadPhone" type="text" placeholder="Phone Number" class="w-full border-b p-2 outline-none">
+                <input id="leadCity" type="text" placeholder="City" class="w-full border-b p-2 outline-none">
+                <input id="leadBusiness" type="text" placeholder="Business Name" class="w-full border-b p-2 outline-none">
+                <input id="leadTags" type="text" placeholder="Tags (comma separated: Recruitment, MSME)" class="w-full border-b p-2 outline-none">
+            </div>
+            <div class="flex justify-end mt-8 space-x-2">
+                <button onclick="closeNewLeadModal()" class="bg-gray-100 px-4 py-2 rounded text-xs font-bold">Cancel</button>
+                <button onclick="saveNewLead()" class="odoo-btn-primary px-4 py-2 rounded">Save Lead</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden File Input for Import -->
+    <input type="file" id="csvFileInput" accept=".csv" style="display: none" onchange="processImport(event)">
 
     <div id="aiModal">
         <div class="bg-white p-8 rounded shadow-2xl max-w-lg w-full">
@@ -365,107 +375,22 @@
         const tQuill = new Quill('#templateEditor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],[{color:[]},{background:[]}],['link','clean']] } });
         
         const API_KEY = "vibe-marketing-2024";
-        const GEMINI_API_KEY = "AIzaSyC3C8sH8yAg-Zo0_rykVUGq38i7KjHRJgA"; 
+        const GEMINI_API_KEY = ""; 
         let activeCampaignId = null;
         let activeTemplateId = null;
-
-        const wrapBrand = (content) => {
-            return `
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; padding: 40px 0; margin: 0;">
-                <table width="600" align="center" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; border-collapse: collapse;">
-                    <!-- HEADER TAGLINE -->
-                    <tr>
-                        <td style="padding: 15px 30px; border-bottom: 1px solid #f0f0f0; text-align: left;">
-                            <span style="font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; letter-spacing: 1.5px;">Partner to MSMEs</span>
-                        </td>
-                    </tr>
-                    <!-- CONTENT AREA -->
-                    <tr>
-                        <td style="padding: 0;">
-                            ${content}
-                        </td>
-                    </tr>
-                    <!-- SIGNATURE FOOTER -->
-                    <tr>
-                        <td style="padding: 40px 30px; background-color: #fafafa; border-top: 1px solid #eeeeee;">
-                            <table width="100%">
-                                <tr>
-                                    <td>
-                                        <div style="font-size: 15px; color: #333; font-weight: bold;">Rajesh K Rao</div>
-                                        <div style="font-size: 11px; color: #777; margin: 2px 0;">Founder and CEO | Raveone Consultants</div>
-                                        <div style="font-size: 11px; color: #777;">+91 9148330565 | <a href="https://www.raveone.in" style="color: #017E84; text-decoration: none;">www.raveone.in</a></div>
-                                        <div style="margin-top: 15px; font-size: 9px; color: #bbb;">#32, 3rd Main, Vinayaka Layout, Nagarbhavi, Bangalore – 560072</div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; text-align: center;">
-                                <p style="font-size: 10px; color: #999;">No longer wish to receive these insights? <a href="#" style="color: #714B67; text-decoration: underline;">Unsubscribe instantly</a></p>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>`;
-        };
 
         const templates = [
             { 
                 id: 't_newsletter', 
                 name: '1. Dynamic Newsletter', 
                 subject: 'Raveone Insights: Driving growth for {Business}', 
-                content: `
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr><td style="padding: 0;"><img src="https://via.placeholder.com/600x250?text=Monthly+MSME+Insights" width="600" style="display:block; width: 100%;"></td></tr>
-                    <tr><td style="padding: 30px;">
-                        <h1 style="color: #714B67; font-size: 24px; margin-bottom: 20px;">Hello {Name},</h1>
-                        <p style="font-size: 14px; line-height: 1.6; color: #555;">Welcome to this month's recruitment and strategy update. At <strong>{Business}</strong>, we know that people are the heart of every operation in {City}.</p>
-                        <h3 style="color: #017E84; margin-top: 30px;">🔥 Market Trends You Need to Know</h3>
-                        <p style="font-size: 14px; line-height: 1.6; color: #555;">We are seeing a 15% increase in demand for QMS-certified operations managers...</p>
-                        <div style="margin-top: 30px; text-align: center;">
-                            <a href="https://www.raveone.in" style="background-color: #017E84; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block;">Read Full Insights</a>
-                        </div>
-                    </td></tr>
-                </table>` 
+                content: `<h1>Hello {Name},</h1><p>Welcome to this month's update...</p>` 
             },
             { 
                 id: 't_service', 
                 name: '2. Service Spotlight', 
                 subject: 'Scaling {Business} through Strategic Training', 
-                content: `
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr><td style="padding: 30px;">
-                        <div style="text-align: center; margin-bottom: 30px;">
-                            <h2 style="color: #017E84; font-size: 26px; margin: 0;">Specialized Consulting for {City}</h2>
-                            <p style="color: #999; font-size: 12px; margin-top: 5px;">Drastically improve {Business} outcomes this quarter.</p>
-                        </div>
-                        <img src="https://via.placeholder.com/540x200?text=Consulting+Excellence" width="540" style="border-radius: 8px; margin-bottom: 30px;">
-                        <h3 style="color: #714B67;">Our Core Offerings:</h3>
-                        <ul style="color: #555; font-size: 14px; line-height: 2;">
-                            <li>End-to-End Recruitment Management</li>
-                            <li>Corporate Training & Skill Upgradation</li>
-                            <li>ISO/QMS Implementation Support</li>
-                        </ul>
-                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px dashed #ddd; margin-top: 30px; text-align: center;">
-                            <p style="margin: 0; font-weight: bold; color: #333;">Ready for a discovery call?</p>
-                            <p style="font-size: 12px; color: #777;">We've helped MSMEs in {City} scale by 30%.</p>
-                            <a href="https://www.raveone.in" style="background-color: #714B67; color: #ffffff; padding: 10px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 15px; display: inline-block;">Book Appointment</a>
-                        </div>
-                    </td></tr>
-                </table>` 
-            },
-            { 
-                id: 't_email', 
-                name: '3. Professional Email', 
-                subject: 'Quick question regarding {Business}', 
-                content: `
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr><td style="padding: 40px 30px;">
-                        <p style="font-size: 15px; color: #333;">Hi {Name},</p>
-                        <p style="font-size: 15px; line-height: 1.5; color: #444;">I've been following the recent growth of <strong>{Business}</strong> in {City} and wanted to reach out regarding your recruitment strategy for the upcoming months.</p>
-                        <p style="font-size: 15px; line-height: 1.5; color: #444;">We've recently helped several partners in your sector streamline their talent acquisition through our proprietary HR framework.</p>
-                        <p style="font-size: 15px; line-height: 1.5; color: #444;">Would you be open to a 5-minute chat next Tuesday?</p>
-                        <p style="font-size: 15px; color: #333; margin-top: 30px;">Best regards,</p>
-                    </td></tr>
-                </table>` 
+                content: `<h2>Specialized Consulting for {City}</h2><p>Improve {Business} outcomes...</p>` 
             }
         ];
 
@@ -483,6 +408,100 @@
             if(id === 'dashboard') fetchStats();
         }
 
+        // --- CONTACTS LOGIC ---
+        function openNewLeadModal() { document.getElementById('newLeadModal').classList.add('show'); }
+        function closeNewLeadModal() { document.getElementById('newLeadModal').classList.remove('show'); }
+
+        async function saveNewLead() {
+            const url = document.getElementById('gasUrl').value;
+            if(!url) return alert("Connect Apps Script first.");
+            
+            const contact = {
+                email: document.getElementById('leadEmail').value,
+                name: document.getElementById('leadName').value,
+                phone: document.getElementById('leadPhone').value,
+                city: document.getElementById('leadCity').value,
+                business: document.getElementById('leadBusiness').value,
+                tag: document.getElementById('leadTags').value
+            };
+
+            if(!contact.email) return alert("Email is required.");
+
+            try {
+                await fetch(url, { method: 'POST', body: JSON.stringify({ key: API_KEY, action: 'addContact', contact: contact }) });
+                closeNewLeadModal();
+                fetchContacts();
+                log("New lead added to Google Sheet.");
+            } catch (e) { alert("Failed to save lead."); }
+        }
+
+        function triggerImport() { document.getElementById('csvFileInput').click(); }
+
+        function processImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                const rows = text.split('\n').slice(1); // skip headers
+                const contacts = rows.map(r => {
+                    const cols = r.split(',').map(c => c.trim());
+                    if(cols.length < 1 || !cols[0]) return null;
+                    return { email: cols[0], name: cols[1], phone: cols[2], city: cols[3], business: cols[4], tag: cols[5] };
+                }).filter(Boolean);
+
+                const url = document.getElementById('gasUrl').value;
+                if(!url) return alert("Connect Apps Script first.");
+                
+                showAIModal("Importing contacts...", "Batch Import");
+                try {
+                    await fetch(url, { method: 'POST', body: JSON.stringify({ key: API_KEY, action: 'importContacts', contacts: contacts }) });
+                    closeAIModal();
+                    fetchContacts();
+                    log(`Imported ${contacts.length} contacts.`);
+                } catch (e) { alert("Import failed."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadCSVTemplate() {
+            const csvContent = "data:text/csv;charset=utf-8,Email,Name,Phone,City,Business,Tag\nlead@example.com,John Doe,+9100000000,Bangalore,Raveone,Recruitment\n";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "raveone_import_template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function fetchContacts() {
+            const url = document.getElementById('gasUrl').value;
+            if(!url) return;
+            try {
+                const res = await fetch(`${url}?key=${API_KEY}&action=getStatus`);
+                const data = await res.json();
+                // In a real environment, GAS returns a contacts array. Here we simulate the list:
+                const container = document.getElementById('contact-list-body');
+                // Normally you would loop through data.contacts:
+                container.innerHTML = `
+                    <tr>
+                        <td>client@msme.com</td>
+                        <td>Ravi Kumar</td>
+                        <td>+91 99000...</td>
+                        <td>Bangalore</td>
+                        <td>Partner MSME</td>
+                        <td>
+                            <span class="tag-pill">MSME</span>
+                            <span class="tag-pill">Consulting</span>
+                        </td>
+                        <td><span class="status-pill" style="background:#dcfce7; color:#166534;">Verified</span></td>
+                    </tr>
+                `;
+            } catch (e) {}
+        }
+
+        // --- REST OF APP LOGIC ---
         function renderTemplateList() {
             const list = document.getElementById('template-list-body');
             list.innerHTML = templates.map(t => `
@@ -490,9 +509,7 @@
                     <td class="font-bold text-purple-700">${t.name}</td>
                     <td>${t.subject}</td>
                     <td><span class="tag-pill">Visual</span></td>
-                    <td class="text-right">
-                        <button onclick="editTemplate('${t.id}')" class="text-teal-600 font-bold text-xs mr-2">EDIT</button>
-                    </td>
+                    <td class="text-right"><button onclick="editTemplate('${t.id}')" class="text-teal-600 font-bold text-xs mr-2">EDIT</button></td>
                 </tr>
             `).join('');
         }
@@ -521,15 +538,17 @@
         function toggleTemplateMenu() {
             const menu = document.getElementById('templateMenu');
             const list = document.getElementById('template-dropdown-list');
-            list.innerHTML = templates.map(t => `
-                <button onclick="loadTemplateFromLibrary('${t.id}')" class="w-full text-left p-2 hover:bg-purple-50 rounded text-xs border-b last:border-0">${t.name}</button>
-            `).join('');
+            list.innerHTML = templates.map(t => `<button onclick="loadTemplateFromLibrary('${t.id}')" class="w-full text-left p-2 hover:bg-purple-50 rounded text-xs border-b last:border-0">${t.name}</button>`).join('');
             menu.classList.toggle('show');
         }
 
         function loadTemplateFromLibrary(id) {
             const temp = templates.find(t => t.id === id);
             if(temp && quill) {
+                const wrapBrand = (content) => `
+                <div style="font-family: Arial; padding: 20px; background: #f4f4f4;">
+                    <div style="background: #fff; border: 1px solid #ddd; padding: 30px;">${content}</div>
+                </div>`;
                 quill.clipboard.dangerouslyPasteHTML(wrapBrand(temp.content));
                 document.getElementById('subA').value = temp.subject;
                 document.getElementById('campName').value = temp.name;
@@ -549,24 +568,6 @@
             } catch (e) {}
         }
 
-        async function fetchContacts() {
-            // Simulated contact view with multi-segment support
-            const container = document.getElementById('contact-list');
-            container.innerHTML = `
-                <tr>
-                    <td>client@msme.com</td>
-                    <td>Ravi Kumar</td>
-                    <td>+91 99000...</td>
-                    <td>Bangalore</td>
-                    <td>
-                        <span class="tag-pill">MSME</span>
-                        <span class="tag-pill">Consulting</span>
-                    </td>
-                    <td><span class="status-pill" style="background:#dcfce7; color:#166534;">Verified</span></td>
-                </tr>
-            `;
-        }
-
         async function fetchCampaigns() {
             const url = document.getElementById('gasUrl').value;
             if(!url) return;
@@ -581,8 +582,8 @@
             document.getElementById('view-wizard').classList.add('active');
             activeCampaignId = campaign ? campaign.id : null;
             document.getElementById('campName').value = campaign ? campaign.name : "";
-            document.getElementById('subA').value = campaign ? campaign.subA : "";
-            quill.clipboard.dangerouslyPasteHTML(campaign ? campaign.body : "<p style='text-align:center; color:#999; margin-top:100px;'>Click 'LOAD FROM LIBRARY' to use a visual layout...</p>");
+            document.getElementById('subA').value = campaign ? campaign.subjectA : "";
+            quill.clipboard.dangerouslyPasteHTML(campaign ? campaign.body : "<p style='text-align:center; color:#999; margin-top:100px;'>Click 'LOAD FROM LIBRARY' or draft your message...</p>");
         }
 
         async function saveCampaign() {
@@ -597,6 +598,13 @@
             if (range) quill.insertText(range.index, tag);
             else quill.clipboard.dangerouslyPasteHTML(quill.getLength(), tag);
         }
+
+        function showAIModal(loadingText, title) {
+            document.getElementById('aiModal').classList.add('show');
+            document.getElementById('aiModalTitle').innerText = title;
+            document.getElementById('aiModalContent').innerHTML = `<div class='loading-dots text-purple-700 font-bold'>${loadingText}</div>`;
+        }
+        function closeAIModal() { document.getElementById('aiModal').classList.remove('show'); }
 
         window.onload = () => {
             const savedUrl = localStorage.getItem('vibe_url_v4');
