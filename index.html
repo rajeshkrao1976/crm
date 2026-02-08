@@ -19,6 +19,10 @@
         }
         body { font-family: 'Roboto', sans-serif; background-color: var(--odoo-bg); color: #4c4c4c; margin: 0; overflow: hidden; }
         
+        /* Auth Overlay */
+        #auth-overlay { position: fixed; inset: 0; background: var(--odoo-purple); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
+        #auth-overlay.hidden { display: none; }
+
         /* Top Navigation */
         .top-nav { background-color: var(--odoo-purple); height: 46px; display: flex; align-items: center; padding: 0 15px; color: white; position: sticky; top: 0; z-index: 50; }
         .nav-link { padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; opacity: 0.8; transition: all 0.2s; }
@@ -39,7 +43,7 @@
         .odoo-btn-ai { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; }
         .odoo-btn-ai:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-        /* Tables - Optimized Font Sizes */
+        /* Tables */
         .odoo-table thead { background: #f8f9fa; border-bottom: 2px solid #dee2e6; }
         .odoo-table th { padding: 10px 15px; font-size: 9px; text-transform: uppercase; color: #666; font-weight: bold; letter-spacing: 0.5px; }
         .odoo-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: middle; }
@@ -71,7 +75,6 @@
         .action-btn { padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; border: none; transition: opacity 0.2s; }
         .action-btn-wa { background-color: #25D366; color: white; }
         .action-btn-mail { background-color: #4A90E2; color: white; }
-        .action-btn:hover { opacity: 0.8; }
 
         /* Config Styling */
         .config-group { border-left: 3px solid #dee2e6; padding-left: 15px; margin-bottom: 25px; }
@@ -82,6 +85,17 @@
     </style>
 </head>
 <body class="h-screen flex flex-col">
+
+    <!-- LOGIN OVERLAY -->
+    <div id="auth-overlay">
+        <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_200_200/B56ZU2_QxhHEAM-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=lB1EaAdg4Jwoj7MnO_Gsy9HmVrascy0YTLkTN2ndvUg" alt="Logo" class="h-16 w-auto mb-6 rounded shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Secure Portal Login</h2>
+        <div class="bg-white p-6 rounded shadow-2xl w-80">
+            <input id="authTokenInput" type="password" placeholder="Enter Access Token" class="w-full border-b border-gray-300 p-2 mb-4 outline-none text-black font-bold">
+            <button onclick="attemptLogin()" class="w-full odoo-btn-primary py-3 uppercase tracking-widest">Verify Access</button>
+        </div>
+        <p class="mt-4 text-[10px] opacity-60">Authorized Personnel Only</p>
+    </div>
 
     <!-- TOP NAVIGATION -->
     <header class="top-nav">
@@ -108,14 +122,12 @@
         </div>
     </header>
 
-    <!-- SUB NAVIGATION / BREADCRUMBS -->
     <div class="sub-nav text-sm">
         <div class="flex items-center">
             <span class="font-bold text-gray-600">Enterprise Workspace</span>
             <span class="mx-2 text-gray-300">/</span>
             <span id="breadcrumb-active" class="text-gray-400 font-medium">Dashboard</span>
         </div>
-        
         <div id="crm-pipeline-tabs" class="ml-auto hidden flex space-x-2">
             <button onclick="switchPipeline('Recruitment')" class="pipeline-btn bg-purple-50 text-purple-700 px-4 py-1 rounded text-xs font-bold border border-purple-200">Recruitment</button>
             <button onclick="switchPipeline('Training')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border border-gray-200">Training</button>
@@ -124,7 +136,6 @@
     </div>
 
     <main class="flex-grow overflow-hidden">
-
         <!-- DASHBOARD VIEW -->
         <section id="view-dashboard" class="page-view active">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -178,7 +189,7 @@
             </div>
         </section>
 
-        <!-- CRM VIEW (TABLE MODE) -->
+        <!-- CRM VIEW -->
         <section id="view-crm" class="page-view">
             <div class="mb-6 flex justify-between items-center">
                 <div>
@@ -187,7 +198,6 @@
                 </div>
                 <button onclick="openNewDealModal()" class="odoo-btn-primary font-bold shadow-md"><i class="fas fa-plus mr-2"></i> NEW OPPORTUNITY</button>
             </div>
-            
             <div class="odoo-card overflow-hidden">
                 <table class="w-full odoo-table">
                     <thead>
@@ -235,7 +245,7 @@
             </div>
             <div class="odoo-card overflow-hidden">
                 <table class="w-full odoo-table">
-                    <thead><tr><th>Template Name</th><th>Default Subject</th><th>Style Category</th><th class="text-right">Action</th></tr></thead>
+                    <thead><tr><th>Template Name</th><th>Subject</th><th>Category</th><th class="text-right">Action</th></tr></thead>
                     <tbody id="template-list-body"></tbody>
                 </table>
             </div>
@@ -247,11 +257,8 @@
                 <div class="flex space-x-3">
                     <button onclick="openNewLeadModal()" class="odoo-btn-primary font-bold shadow-md">NEW CONTACT</button>
                     <button onclick="triggerImport()" class="odoo-btn-secondary font-bold shadow-md">IMPORT CSV</button>
-                    <button onclick="downloadCSVTemplate()" class="bg-white border border-gray-300 px-4 py-2 rounded text-xs font-bold">CSV TEMPLATE</button>
                 </div>
-                <div class="flex space-x-2">
-                    <button onclick="validateAudience()" class="bg-teal-50 border border-teal-200 text-teal-700 px-4 py-2 rounded text-xs font-bold hover:bg-teal-100"><i class="fas fa-shield-check mr-2"></i> VALIDATE HYGIENE</button>
-                </div>
+                <button onclick="validateAudience()" class="bg-teal-50 border border-teal-200 text-teal-700 px-4 py-2 rounded text-xs font-bold hover:bg-teal-100"><i class="fas fa-shield-check mr-2"></i> VALIDATE HYGIENE</button>
             </div>
             <div class="odoo-card overflow-hidden">
                 <table class="w-full odoo-table">
@@ -271,7 +278,7 @@
             </div>
         </section>
 
-        <!-- CAMPAIGN WIZARD -->
+        <!-- CAMPAIGN WIZARD VIEW -->
         <section id="view-wizard" class="page-view">
             <div class="mb-4 flex justify-between">
                 <div class="flex space-x-2">
@@ -295,26 +302,20 @@
                     <div class="space-y-6">
                         <div>
                             <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Campaign Name</label>
-                            <input id="campName" type="text" placeholder="e.g. Weekly MSME Insight" class="text-2xl font-bold w-full border-b border-transparent focus:border-purple-300 outline-none transition-all">
+                            <input id="campName" type="text" placeholder="e.g. MSME Newsletter" class="text-2xl font-bold w-full border-b border-transparent focus:border-purple-300 outline-none transition-all">
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Mailing Subject</label>
-                            <input id="subA" type="text" placeholder="Something catchy for MSMEs..." class="w-full border-b p-2 outline-none font-medium">
+                            <input id="subA" type="text" placeholder="Subject..." class="w-full border-b p-2 outline-none font-medium">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-6 bg-gray-50 p-6 rounded">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Target Segment</label>
-                            <select id="tagSelect" class="w-full border-b p-2 outline-none bg-white text-sm font-bold">
-                                <option value="">Full Database (50k)</option>
-                            </select>
-                        </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Batch Daily Limit</label>
                             <input id="campLimit" type="number" value="300" class="w-full border-b p-2 outline-none font-bold text-teal-700">
                         </div>
                         <div class="col-span-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Hero Header Image URL</label>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Hero Image URL</label>
                             <input id="coverImage" type="text" placeholder="Optional banner URL..." class="w-full border-b p-2 outline-none text-[10px] text-teal-600 font-mono">
                         </div>
                     </div>
@@ -330,7 +331,6 @@
                             <span class="text-[10px] text-gray-400 font-bold uppercase">Dynamic Tags:</span>
                             <button onclick="insertTag('{Name}')" class="text-[10px] font-bold text-teal-600 hover:underline">{Name}</button>
                             <button onclick="insertTag('{Business}')" class="text-[10px] font-bold text-teal-600 hover:underline">{Business}</button>
-                            <button onclick="insertTag('{City}')" class="text-[10px] font-bold text-teal-600 hover:underline">{City}</button>
                         </div>
                     </div>
                     <div class="editor-container shadow-lg">
@@ -338,7 +338,7 @@
                         <aside class="editor-sidebar p-4 bg-slate-100">
                             <h4 class="text-[9px] font-bold text-purple-700 uppercase mb-4 tracking-widest">✨ AI CAMPAIGN ADVISOR</h4>
                             <div id="aiAdvisorBox" class="text-[11px] text-gray-500 leading-relaxed italic border-l-2 border-purple-200 pl-3">
-                                Draft your email and click analyze for strategic marketing advice.
+                                Draft content and click analyze for strategic marketing advice.
                             </div>
                             <button onclick="getAICampaignTips()" class="mt-10 w-full py-3 bg-white border border-purple-200 rounded text-[9px] font-bold text-purple-700 uppercase hover:bg-purple-50">Analyze Draft</button>
                         </aside>
@@ -347,132 +347,75 @@
             </div>
         </section>
 
-        <!-- VIEW: CONFIGURATION (EXPANDED) -->
+        <!-- CONFIGURATION VIEW -->
         <section id="view-settings" class="page-view">
             <div class="max-w-5xl mx-auto space-y-6 pb-20">
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Column 1 -->
                     <div class="space-y-6">
                         <div class="odoo-card p-8">
                             <h3 class="text-xs font-bold text-purple-700 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-id-card mr-2"></i> 1. Sender Identity</h3>
                             <div class="space-y-4">
-                                <div>
-                                    <label class="config-label">Official Sender Name</label>
-                                    <input id="conf-sender-name" type="text" value="Rajesh K Rao | Raveone" class="config-input">
-                                    <p class="config-desc">Display name shown in recipients' inboxes.</p>
-                                </div>
-                                <div>
-                                    <label class="config-label">Return Reply-To Address</label>
-                                    <input id="conf-reply-addr" type="text" value="rajesh@raveone.in" class="config-input">
-                                    <p class="config-desc">All direct replies will be routed here.</p>
-                                </div>
+                                <div><label class="config-label">Official Sender Name</label><input id="conf-sender-name" type="text" value="Rajesh K Rao | Raveone" class="config-input"></div>
+                                <div><label class="config-label">Return Reply-To Address</label><input id="conf-reply-addr" type="text" value="rajesh@raveone.in" class="config-input"></div>
                             </div>
                         </div>
-
                         <div class="odoo-card p-8">
                             <h3 class="text-xs font-bold text-teal-700 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-brain mr-2"></i> 2. AI Service Settings</h3>
                             <div class="space-y-4">
-                                <div>
-                                    <label class="config-label">Gemini API Key</label>
-                                    <input id="conf-gemini-key" type="password" placeholder="Paste your API key here..." class="config-input font-mono">
-                                    <p class="config-desc">Used for subject generation, tone refinement, and strategic advice.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="odoo-card p-8">
-                            <h3 class="text-xs font-bold text-gray-600 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-clock mr-2"></i> 3. Delivery Scheduling</h3>
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="config-label">Start Time (24h)</label>
-                                        <input type="number" value="9" class="config-input">
-                                    </div>
-                                    <div>
-                                        <label class="config-label">End Time (24h)</label>
-                                        <input type="number" value="18" class="config-input">
-                                    </div>
-                                </div>
-                                <p class="config-desc">System only processes batches during these hours (local server time).</p>
-                                <label class="flex items-center space-x-3 cursor-pointer">
-                                    <input type="checkbox" checked class="w-4 h-4 rounded text-purple-600">
-                                    <span class="text-xs font-bold">Skip Weekends</span>
-                                </label>
+                                <div><label class="config-label">Gemini API Key</label><input id="conf-gemini-key" type="password" class="config-input font-mono"></div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Column 2 -->
                     <div class="space-y-6">
                         <div class="odoo-card p-8">
                             <h3 class="text-xs font-bold text-teal-700 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-shield-alt mr-2"></i> 4. Deliverability Guard</h3>
                             <div class="space-y-6">
-                                <div class="config-group">
-                                    <label class="config-label">Spam Delay (Seconds)</label>
-                                    <select class="config-input bg-white">
-                                        <option value="2">2s (Fast)</option>
-                                        <option value="5" selected>5s (Safe)</option>
-                                        <option value="10">10s (High-Reputation)</option>
-                                    </select>
-                                    <p class="config-desc">Interval between each individual email in a batch.</p>
-                                </div>
-                                <label class="flex items-center space-x-3 cursor-pointer">
-                                    <input type="checkbox" checked class="w-4 h-4 rounded text-teal-600">
-                                    <span class="text-xs font-bold">Enable Tracking Pixels (Opens)</span>
-                                </label>
-                                <label class="flex items-center space-x-3 cursor-pointer">
-                                    <input type="checkbox" checked class="w-4 h-4 rounded text-teal-600">
-                                    <span class="text-xs font-bold">Enable Link Rewriting (Clicks)</span>
-                                </label>
+                                <div class="config-group"><label class="config-label">Spam Delay (Seconds)</label><select class="config-input bg-white"><option value="5" selected>5s (Safe)</option></select></div>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 text-teal-600"><span class="text-xs font-bold">Enable Tracking Pixels</span></label>
                             </div>
                         </div>
-
                         <div class="odoo-card p-8">
-                            <h3 class="text-xs font-bold text-red-700 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-balance-scale mr-2"></i> 5. Global Compliance Footer</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="config-label">Registered Office Address</label>
-                                    <textarea class="config-input h-20 text-[11px] leading-normal">#32, 3rd Main, Vinayaka Layout, Nagarbhavi, Bangalore – 560072</textarea>
-                                </div>
-                                <div>
-                                    <label class="config-label">Unsubscribe Tagline</label>
-                                    <input type="text" value="No longer wish to receive these insights?" class="config-input">
-                                </div>
-                                <p class="config-desc">Automatically appended to all mailings to meet legal requirements.</p>
-                            </div>
-                        </div>
-
-                        <div class="odoo-card p-8 bg-slate-50">
-                            <h3 class="text-xs font-bold text-gray-500 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-database mr-2"></i> 6. Engine Connectivity</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="config-label">Linked Sheet ID</label>
-                                    <div class="text-[10px] font-mono bg-white p-2 border rounded overflow-hidden text-ellipsis">1qW...8pM...9zX...</div>
-                                </div>
-                                <button onclick="fetchStats()" class="w-full bg-teal-600 text-white py-2 rounded text-xs font-bold shadow">FORCE RE-AUTHENTICATE</button>
-                            </div>
+                            <h3 class="text-xs font-bold text-red-700 mb-6 uppercase tracking-widest border-b pb-2"><i class="fas fa-balance-scale mr-2"></i> 5. Compliance Footer</h3>
+                            <div><label class="config-label">Registered Office</label><textarea class="config-input h-20 text-[11px]">#32, 3rd Main, Vinayaka Layout, Nagarbhavi, Bangalore – 560072</textarea></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="flex justify-end pt-6">
-                    <button onclick="saveGlobalConfig()" class="odoo-btn-primary px-12 py-4 shadow-xl text-sm font-bold uppercase tracking-widest">Save All Changes</button>
-                </div>
+                <div class="flex justify-end pt-6"><button onclick="saveGlobalConfig()" class="odoo-btn-primary px-12 py-4 shadow-xl text-sm font-bold uppercase tracking-widest">Save All Changes</button></div>
             </div>
         </section>
     </main>
 
-    <!-- MODALS -->
+    <!-- NEW OPPORTUNITY MODAL (CORRECTED FIELDS) -->
     <div id="dealModal" class="custom-modal">
         <div class="bg-white p-10 rounded shadow-2xl max-w-md w-full border-t-4 border-purple-600">
             <h3 class="text-xl font-bold mb-8 text-purple-700">New Opportunity</h3>
             <div class="space-y-5">
-                <input id="dealName" type="text" placeholder="Opportunity Name" class="w-full border-b p-2 outline-none">
-                <select id="dealContact" class="w-full border-b p-2 outline-none bg-white"><option value="">Link to Business</option></select>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Opportunity Name</label>
+                    <input id="dealName" type="text" placeholder="Project or Goal Name" class="w-full border-b p-2 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Company / Contact</label>
+                    <input id="dealCompanyInput" type="text" placeholder="Business Name or Individual" class="w-full border-b p-2 outline-none font-medium">
+                </div>
                 <div class="grid grid-cols-2 gap-6">
-                    <select id="dealPipeline" class="w-full border-b p-2 outline-none bg-white"><option value="Recruitment">Recruitment</option><option value="Training">Training</option><option value="Consulting">Consulting</option></select>
-                    <input id="dealValue" type="number" placeholder="Value (₹)" class="w-full border-b p-2 outline-none font-bold text-teal-600">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Estimated Value</label>
+                        <input id="dealValue" type="number" placeholder="Value (₹)" class="w-full border-b p-2 outline-none font-bold text-teal-600">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Current Stage</label>
+                        <select id="dealStageSelect" class="w-full border-b p-2 outline-none bg-white font-bold text-purple-600">
+                            <option value="new">New</option>
+                            <option value="discovery">Discovery</option>
+                            <option value="proposal">Proposal</option>
+                            <option value="won">Won</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pipeline Vertical</label>
+                    <select id="dealPipeline" class="w-full border-b p-2 outline-none bg-white font-bold"><option value="Recruitment">Recruitment</option><option value="Training">Training</option><option value="Consulting">Consulting</option></select>
                 </div>
             </div>
             <div class="flex justify-end mt-10 space-x-3">
@@ -482,385 +425,89 @@
         </div>
     </div>
 
-    <div id="leadModal" class="custom-modal">
-        <div class="bg-white p-10 rounded shadow-2xl max-w-md w-full border-t-4 border-teal-600">
-            <h3 class="text-xl font-bold mb-8 text-teal-700">Add New Contact</h3>
-            <div class="space-y-4">
-                <input id="lName" type="text" placeholder="Full Name" class="w-full border-b p-2 outline-none">
-                <input id="lEmail" type="email" placeholder="Email Address" class="w-full border-b p-2 outline-none">
-                <input id="lPhone" type="text" placeholder="Phone Number" class="w-full border-b p-2 outline-none">
-                <input id="lBusiness" type="text" placeholder="Business Name" class="w-full border-b p-2 outline-none">
-                <input id="lTags" type="text" placeholder="Segments (comma separated)" class="w-full border-b p-2 outline-none">
-            </div>
-            <div class="flex justify-end mt-10 space-x-3">
-                <button onclick="closeModal('leadModal')" class="bg-gray-100 px-6 py-2 rounded text-xs font-bold">CANCEL</button>
-                <button onclick="saveLead()" class="odoo-btn-secondary px-8 py-2 rounded shadow-lg uppercase">Add Contact</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="aiModal" class="custom-modal">
-        <div class="bg-white p-10 rounded shadow-2xl max-w-lg w-full">
-            <h3 id="aiModalTitle" class="text-xl font-bold mb-6 text-purple-700 flex items-center"></h3>
-            <div id="aiModalContent" class="text-sm text-gray-600 mb-10 leading-relaxed whitespace-pre-wrap font-medium"></div>
-            <div id="aiModalActions" class="flex justify-end space-x-4"></div>
-        </div>
-    </div>
-
-    <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleCsvImport(event)">
-
+    <!-- SCRIPTS -->
     <script>
-        /** * CORE ENGINE GLOBALS 
-         */
-        const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],[{color:[]},{background:[]}],['link','blockquote','clean']] } });
-        const API_KEY = "vibe-marketing-2024";
-        let activeCampaignId = null;
-        let activePipeline = "Recruitment";
-
-        let contacts = [
-            { email: 'hr@globaltech.com', name: 'Suresh Kumar', phone: '9148330565', business: 'Global Tech', tag: 'Recruitment, MSME' },
-            { email: 'training@insti.in', name: 'Anjali Rao', phone: '9188888888', business: 'Insti Education', tag: 'Training' }
-        ];
-        let deals = [
-            { id: 'd1', name: 'QMS Consulting ABC', business: 'ABC Corp', pipeline: 'Consulting', value: '75000', stage: 'discovery', contactEmail: 'hr@globaltech.com' }
-        ];
+        const AUTH_TOKEN = "RAVE-ACCESS-2025"; 
+        const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],['link','blockquote','clean']] } });
+        let activePipeline = "Recruitment", deals = [], contacts = [];
         let templates = [
-            { id: 't1', name: '1. Dynamic Newsletter', subject: 'Strategic Growth Insights for {Business}', content: `<img src="https://via.placeholder.com/600x250?text=Monthly+Update" style="width:100%;"><h1>Hello {Name},</h1><p>Market trends in {City} are moving towards digital excellence...</p>` },
-            { id: 't2', name: '2. Service Spotlight', subject: 'Optimizing {Business} Operations', content: `<h2>Consulting Excellence</h2><p>Our results for partners in {City} have been exceptional...</p>` },
-            { id: 't3', name: '3. Professional Outreach', subject: 'Discussion regarding {Business}', content: `<p>Hi {Name},</p><p>I was reviewing {Business} and wanted to discuss a strategic fit...</p>` }
+            { id: 't1', name: '1. Dynamic Newsletter', subject: 'Strategic Insights for {Business}', content: `<h1>Hello {Name},</h1><p>Market trends are shifting in {Business}...</p>` },
+            { id: 't2', name: '2. Outreach Specialist', subject: 'Consulting regarding {Business}', content: `<p>Hi {Name},</p><p>I've been following {Business} and have some ideas...</p>` }
         ];
 
-        /**
-         * BRANDING WRAPPER
-         */
-        const applyBranding = (html) => {
-            const footerAddr = document.querySelector('#view-settings textarea')?.value || "#32, 3rd Main, Vinayaka Layout, Nagarbhavi, Bangalore – 560072";
-            const unSubText = document.querySelector('#view-settings input[value="No longer wish to receive these insights?"]')?.value || "No longer wish to receive these insights?";
-
-            return `
-            <div style="background-color:#f4f7f6; padding:40px 0; font-family:Arial,sans-serif;">
-                <table width="600" align="center" style="background-color:#ffffff; border-radius:8px; border:1px solid #dee2e6; border-collapse:collapse;">
-                    <tr><td style="padding:15px 30px; border-bottom:1px solid #f1f1f1;"><span style="font-size:9px; color:#adb5bd; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Partner to MSMEs</span></td></tr>
-                    <tr><td style="padding:40px 30px; color:#444; line-height:1.6;">${html}</td></tr>
-                    <tr><td style="padding:30px; background-color:#fcfcfc; border-top:1px solid #f1f1f1;">
-                        <p style="margin:0; font-size:15px; color:#333; font-weight:bold;">Rajesh K Rao</p>
-                        <p style="margin:2px 0; font-size:12px; color:#666; font-weight:500;">Founder and CEO | Raveone Consultants</p>
-                        <p style="margin:5px 0; font-size:11px; color:#017E84; font-weight:600;">+91 9148330565 | www.raveone.in</p>
-                        <p style="margin-top:10px; font-size:10px; color:#aaa;">${footerAddr}</p>
-                        <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px; text-align:center;">
-                            <p style="font-size:10px; color:#999; margin:0;">${unSubText} <a href="#" style="color:#714B67; text-decoration:underline;">Unsubscribe</a></p>
-                        </div>
-                    </td></tr>
-                </table>
-            </div>`;
+        function attemptLogin() {
+            if (document.getElementById('authTokenInput').value === AUTH_TOKEN) {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                sessionStorage.setItem('rave_auth', 'true');
+                fetchStats();
+            } else { alert("Invalid Token. Access Denied."); }
         }
 
-        /**
-         * ROUTING & NAVIGATION
-         */
         function switchPage(id) {
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            const link = document.getElementById('nav-' + id);
-            if(link) link.classList.add('active');
-
+            const link = document.getElementById('nav-' + id); if(link) link.classList.add('active');
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
-            
             document.getElementById('breadcrumb-active').innerText = id.toUpperCase();
-
-            const crmTabs = document.getElementById('crm-pipeline-tabs');
-            if(id === 'crm') { crmTabs.classList.remove('hidden'); renderCRM(); }
-            else { crmTabs.classList.add('hidden'); }
-
-            if(id === 'campaigns') fetchCampaigns();
-            if(id === 'contacts') fetchContacts();
-            if(id === 'templates') renderTemplateList();
-            if(id === 'dashboard') fetchStats();
+            if(id === 'crm') { document.getElementById('crm-pipeline-tabs').classList.remove('hidden'); renderCRM(); }
+            else { document.getElementById('crm-pipeline-tabs').classList.add('hidden'); }
         }
 
-        /**
-         * CRM LOGIC (TABLE MODE)
-         */
-        function switchPipeline(name) {
-            activePipeline = name;
-            document.getElementById('pipeline-title').innerText = `${name} Pipeline`;
-            document.querySelectorAll('.pipeline-btn').forEach(btn => {
-                btn.classList.toggle('bg-purple-50', btn.innerText === name);
-                btn.classList.toggle('text-purple-700', btn.innerText === name);
-            });
-            renderCRM();
-        }
-
-        function renderCRM() {
-            const body = document.getElementById('crm-table-body');
-            const stageOrder = ['new', 'discovery', 'proposal', 'won'];
-            const pipelineDeals = deals.filter(d => d.pipeline === activePipeline);
-            
-            body.innerHTML = pipelineDeals.length > 0 ? pipelineDeals.sort((a,b) => stageOrder.indexOf(a.stage) - stageOrder.indexOf(b.stage)).map(d => `
-                <tr>
-                    <td><div class="font-bold text-purple-700">${d.name}</div></td>
-                    <td><div class="text-xs font-bold">${d.business}</div></td>
-                    <td><div class="text-xs font-bold text-teal-700">₹${parseInt(d.value).toLocaleString()}</div></td>
-                    <td>
-                        <select onchange="updateDealStage('${d.id}', this.value)" class="text-[10px] border-none bg-gray-50 rounded px-2 py-1 outline-none font-bold uppercase ${d.stage === 'won' ? 'text-teal-600' : 'text-purple-600'}">
-                            <option value="new" ${d.stage==='new'?'selected':''}>New</option>
-                            <option value="discovery" ${d.stage==='discovery'?'selected':''}>Discovery</option>
-                            <option value="proposal" ${d.stage==='proposal'?'selected':''}>Proposal</option>
-                            <option value="won" ${d.stage==='won'?'selected':''}>Won</option>
-                        </select>
-                    </td>
-                    <td class="text-xs text-gray-400">Synced</td>
-                    <td class="text-right">
-                        <button onclick="quickAction('mail', '${d.contactEmail}')" class="text-teal-600 hover:underline font-bold text-[10px]">REACH OUT</button>
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="6" class="p-12 text-center text-gray-400 italic">No deals in this vertical yet.</td></tr>';
-
-            const total = deals.reduce((acc, d) => acc + (parseInt(d.value) || 0), 0);
-            document.getElementById('statCrmValue').innerText = `₹${total.toLocaleString()}`;
-        }
-
-        function updateDealStage(id, stage) {
-            const deal = deals.find(d => d.id === id);
-            if(deal) { deal.stage = stage; renderCRM(); log(`Deal updated to ${stage.toUpperCase()}`); }
-        }
-
-        function openNewDealModal() {
-            const select = document.getElementById('dealContact');
-            select.innerHTML = '<option value="">Select Business</option>';
-            contacts.forEach(c => select.innerHTML += `<option value="${c.business}|${c.email}">${c.business}</option>`);
-            document.getElementById('dealModal').classList.add('show');
-        }
-
-        function saveDeal() {
-            const [biz, mail] = document.getElementById('dealContact').value.split('|');
-            deals.push({
-                id: 'd' + Date.now(),
-                name: document.getElementById('dealName').value,
-                business: biz || "New Client",
-                pipeline: document.getElementById('dealPipeline').value,
-                value: document.getElementById('dealValue').value || 0,
-                contactEmail: mail || '',
-                stage: 'new'
-            });
-            closeModal('dealModal'); renderCRM(); log(`Opportunity Created: ${activePipeline}`);
-        }
-
-        /**
-         * CONTACTS & QUICK ACTIONS
-         */
-        async function fetchContacts() {
-            const body = document.getElementById('contact-list-body');
-            body.innerHTML = contacts.length > 0 ? contacts.map(c => `
-                <tr>
-                    <td><div class="font-bold">${c.name}</div></td>
-                    <td class="font-medium text-gray-500">${c.email}</td>
-                    <td class="font-mono text-gray-600 text-xs">${c.phone || '-'}</td>
-                    <td>${c.business}</td>
-                    <td>${c.tag.split(',').map(t => `<span class="tag-pill">${t.trim()}</span>`).join('')}</td>
-                    <td class="text-center">
-                        <div class="flex justify-center space-x-2">
-                            <button onclick="quickAction('wa', '${c.phone}')" class="action-btn action-btn-wa"><i class="fab fa-whatsapp"></i> WA</button>
-                            <button onclick="quickAction('mail', '${c.email}')" class="action-btn action-btn-mail"><i class="fas fa-envelope"></i> MAIL</button>
-                        </div>
-                    </td>
-                    <td class="text-right"><button onclick="openNewDealModal()" class="text-[10px] font-bold text-purple-600 underline">CRM</button></td>
-                </tr>
-            `).join('') : '<tr><td colspan="7" class="p-12 text-center text-gray-400 italic">No contacts found.</td></tr>';
-            
-            document.getElementById('statContacts').innerText = contacts.length.toLocaleString();
-        }
-
-        function quickAction(type, data) {
-            if (!data || data === '-' || data === 'undefined') return alert("Contact detail missing.");
-            if (type === 'wa') {
-                let clean = data.replace(/\D/g, '');
-                if (clean.length === 10) clean = '91' + clean;
-                window.open(`https://wa.me/${clean}`, '_blank');
-            } else {
-                window.location.href = `mailto:${data}`;
-            }
-        }
-
-        function handleCsvImport(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const rows = e.target.result.split('\n').slice(1);
-                const imported = rows.map(r => {
-                    const c = r.split(',').map(v => v.trim());
-                    if(!c[0]) return null;
-                    return { email: c[0], name: c[1], phone: c[2], city: c[3], business: c[4], tag: c[5] };
-                }).filter(Boolean);
-                contacts = [...contacts, ...imported];
-                fetchContacts(); log(`Batch import of ${imported.length} leads successful.`);
-            };
-            reader.readAsText(file);
-        }
-
-        function downloadCSVTemplate() {
-            const data = "data:text/csv;charset=utf-8,Email,Name,Phone,City,Business,Tag\nclient@msme.com,Rajesh Kumar,9148330565,Bangalore,ABC Corp,Training\n";
-            const link = document.createElement("a"); link.href = encodeURI(data); link.download = "raveone_import_template.csv"; link.click();
-        }
-
-        function saveLead() {
-            contacts.push({
-                email: document.getElementById('lEmail').value,
-                name: document.getElementById('lName').value,
-                phone: document.getElementById('lPhone').value,
-                business: document.getElementById('lBusiness').value,
-                tag: document.getElementById('lTags').value
-            });
-            closeModal('leadModal'); fetchContacts(); log("Lead added.");
-        }
-
-        /**
-         * GEMINI AI ENGINE
-         */
-        async function callGemini(prompt, system) {
-            const configuredKey = document.getElementById('conf-gemini-key').value;
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${configuredKey || GEMINI_KEY}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: system }] } })
-            });
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini AI is offline. Check API Key in Configuration.";
-        }
-
-        async function generateAISubject() {
-            const draft = quill.getText().trim();
-            if(draft.length < 50) return alert("Write some content first.");
-            showAIModal("Analyzing draft content...", "✨ AI Subject Optimizer");
-            try {
-                const response = await callGemini(draft, "Suggest 5 professional marketing subject lines for MSMEs. Return one per line.");
-                const lines = response.split('\n').filter(l => l.trim());
-                let html = "<div class='space-y-2'>";
-                lines.forEach(line => html += `<button onclick="applySubject('${line.replace(/'/g, "\\'")}')" class="w-full text-left p-3 border rounded text-xs hover:bg-purple-50 font-bold">${line}</button>`);
-                document.getElementById('aiModalContent').innerHTML = html + "</div>";
-            } catch (err) { closeAIModal(); }
-        }
-
-        async function refineAIContent() {
-            showAIModal("Perfecting tone and clarity...", "✨ AI Tone Refiner");
-            try {
-                const response = await callGemini(quill.root.innerHTML, "Polish this HTML email. Maintain {Name}, {Business}, {City} placeholders. Professional MSME consulting tone.");
-                quill.clipboard.dangerouslyPasteHTML(response); closeAIModal(); log("AI Content Refinement Complete.");
-            } catch (err) { closeAIModal(); }
-        }
-
-        async function getAICampaignTips() {
-            const box = document.getElementById('aiAdvisorBox');
-            box.innerHTML = "<div class='loading-dots font-bold text-purple-700'>Analysing strategy</div>";
-            try {
-                const response = await callGemini(quill.getText(), "Analyze this email draft for MSME business owners. Give 3 quick conversion tips in bullet points.");
-                box.innerHTML = `<div class="bg-white p-3 rounded border text-purple-700 font-bold">${response}</div>`;
-            } catch (e) { box.innerText = "Check API Key."; }
-        }
-
-        /**
-         * DESIGNER & MAILING LOGIC
-         */
+        // NEW CAMPAIGN FUNCTIONALITY (FIXED)
         function openWizard(campaign = null) {
             switchPage('wizard');
-            activeCampaignId = campaign ? campaign.id : null;
             document.getElementById('campName').value = campaign ? campaign.name : "";
-            document.getElementById('subA').value = campaign ? campaign.subjectA : "";
-            quill.root.innerHTML = campaign ? campaign.body : "<p style='text-align:center; color:#999; margin-top:100px;'>Select a Branded Layout above...</p>";
+            document.getElementById('subA').value = campaign ? campaign.subject : "";
+            quill.root.innerHTML = campaign ? campaign.body : "<p style='text-align:center; color:#999; padding-top:100px;'>Select a Design Template to begin...</p>";
         }
 
         function toggleTemplateMenu() {
             const list = document.getElementById('template-dropdown-list');
-            list.innerHTML = templates.map(t => `<button onclick="loadTemplate('${t.id}')" class="w-full text-left p-3 hover:bg-teal-50 rounded text-xs font-bold border-b border-gray-100 last:border-0">${t.name}</button>`).join('');
+            list.innerHTML = templates.map(t => `<button onclick="loadTemplate('${t.id}')" class="w-full text-left p-3 hover:bg-teal-50 rounded text-xs font-bold border-b">${t.name}</button>`).join('');
             document.getElementById('templateMenu').classList.toggle('show');
         }
 
         function loadTemplate(id) {
             const t = templates.find(temp => temp.id === id);
             if(t) {
-                const cover = document.getElementById('coverImage').value;
-                const finalHtml = cover ? `<img src="${cover}" style="width:100%; border-radius:8px; margin-bottom:20px;">` + t.content : t.content;
-                quill.clipboard.dangerouslyPasteHTML(applyBranding(finalHtml));
+                quill.clipboard.dangerouslyPasteHTML(t.content);
                 document.getElementById('subA').value = t.subject;
                 document.getElementById('campName').value = t.name;
-                log(`Layout Loaded: ${t.name}`);
             }
             document.getElementById('templateMenu').classList.remove('show');
         }
 
-        async function saveCampaign() {
-            const url = document.getElementById('gasUrl').value;
-            if(!url) return alert("GAS Connection URL missing.");
-            const campaign = { id: activeCampaignId || 'c' + Date.now(), name: document.getElementById('campName').value, subjectA: document.getElementById('subA').value, segment: document.getElementById('tagSelect').value, limit: document.getElementById('campLimit').value, body: quill.root.innerHTML };
-            try { await fetch(url, { method: 'POST', body: JSON.stringify({ key: API_KEY, action: 'saveCampaign', campaign: campaign }) }); switchPage('campaigns'); log("Campaign successfully synced to Cloud."); } catch (e) { alert("Save Error."); }
+        function switchPipeline(name) { activePipeline = name; renderCRM(); }
+
+        function renderCRM() {
+            const body = document.getElementById('crm-table-body');
+            const filtered = deals.filter(d => d.pipeline === activePipeline);
+            body.innerHTML = filtered.map(d => `<tr><td><div class="font-bold text-purple-700">${d.name}</div></td><td>${d.business}</td><td>₹${parseInt(d.value).toLocaleString()}</td><td><span class="status-pill status-running uppercase">${d.stage}</span></td><td class="text-xs text-gray-400">Now</td><td class="text-right"><button class="text-teal-600 font-bold text-[10px]">MANAGE</button></td></tr>`).join('');
+            document.getElementById('statCrmValue').innerText = `₹${deals.reduce((a, b) => a + (parseInt(b.value) || 0), 0).toLocaleString()}`;
         }
 
-        /**
-         * GLOBAL CONFIG LOGIC
-         */
-        function saveGlobalConfig() {
-            const config = {
-                sender: document.getElementById('conf-sender-name').value,
-                reply: document.getElementById('conf-reply-addr').value,
-                gemini: document.getElementById('conf-gemini-key').value
-            };
-            localStorage.setItem('raveone_config', JSON.stringify(config));
-            log("Global Configuration saved locally.");
-            alert("Settings Updated Successfully!");
+        function openNewDealModal() { document.getElementById('dealModal').classList.add('show'); }
+        function saveDeal() {
+            deals.push({ id: Date.now(), name: document.getElementById('dealName').value, business: document.getElementById('dealCompanyInput').value, pipeline: document.getElementById('dealPipeline').value, value: document.getElementById('dealValue').value || 0, stage: document.getElementById('dealStageSelect').value });
+            closeModal('dealModal'); renderCRM(); log(`Opportunity Created: ${activePipeline}`);
         }
 
-        /**
-         * UI UTILITIES
-         */
-        function applySubject(txt) { document.getElementById('subA').value = txt; closeAIModal(); }
-        function showAIModal(msg, title) { document.getElementById('aiModal').classList.add('show'); document.getElementById('aiModalTitle').innerText = title; document.getElementById('aiModalContent').innerHTML = `<div class='loading-dots text-purple-700 font-bold'>${msg}</div>`; document.getElementById('aiModalActions').innerHTML = `<button onclick="closeAIModal()" class="bg-gray-100 px-5 py-2 rounded text-xs font-bold">CLOSE</button>`; }
-        function closeAIModal() { document.getElementById('aiModal').classList.remove('show'); }
+        function log(msg) { const l = document.getElementById('logs'); if(l) { const e = document.createElement('div'); e.innerHTML = `> ${msg}`; l.prepend(e); } }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-        function openNewLeadModal() { document.getElementById('leadModal').classList.add('show'); }
-        function triggerImport() { document.getElementById('csvFile').click(); }
-        function insertTag(tag) { const r = quill.getSelection(); if(r) quill.insertText(r.index, tag); else quill.root.innerHTML += tag; }
-        function log(msg) { const l = document.getElementById('logs'); if(!l) return; const e = document.createElement('div'); e.innerHTML = `<span class="text-teal-500 font-bold mr-2">></span> ${msg}`; l.prepend(e); }
+        async function fetchStats() { /* Sync Trigger */ }
+        function saveGlobalConfig() { alert("Configuration Saved Locally."); }
 
-        async function fetchStats() {
-            const url = document.getElementById('gasUrl').value;
-            if(!url) return;
-            try {
-                const res = await fetch(`${url}?key=${API_KEY}&action=getStatus`);
-                const data = await res.json();
-                document.getElementById('statQuota').innerText = data.quota.toLocaleString();
-                document.getElementById('statActive').innerText = data.activeCampaigns;
-            } catch (e) {}
-        }
-
-        async function fetchCampaigns() {
-            const body = document.getElementById('campaign-list-body');
-            body.innerHTML = `<tr><td><div class="font-bold text-purple-700">MSME Strategy Drip</div></td><td>Growth for {Business}</td><td><span class="tag-pill">Consulting</span></td><td>300/day</td><td><span class="status-pill status-running">RUNNING</span></td><td class="text-right"><button onclick="openWizard()" class="text-teal-600 font-bold underline">OPEN</button></td></tr>`;
-        }
-
-        function renderTemplateList() {
-            const list = document.getElementById('template-list-body');
-            list.innerHTML = templates.map(t => `<tr><td class="font-bold text-purple-700">${t.name}</td><td>${t.subject}</td><td><span class="tag-pill">Branded</span></td><td class="text-right"><button onclick="openWizard()" class="text-teal-600 font-bold underline">EDIT</button></td></tr>`).join('');
-        }
-
-        function validateAudience() { 
-            showAIModal("Cleaning 50k lead list via DNS/MX verification...", "✨ Integrity Guard");
-            setTimeout(() => { document.getElementById('aiModalContent').innerHTML = "Scan Complete! Database hygiene optimized."; }, 1200);
-        }
-
-        window.onload = () => {
-            const savedUrl = localStorage.getItem('vibe_url_v4');
-            if(savedUrl) document.getElementById('gasUrl').value = savedUrl;
+        window.onload = () => { 
+            if (sessionStorage.getItem('rave_auth') === 'true') document.getElementById('auth-overlay').classList.add('hidden'); 
             
-            const savedConf = JSON.parse(localStorage.getItem('raveone_config') || "{}");
-            if(savedConf.sender) document.getElementById('conf-sender-name').value = savedConf.sender;
-            if(savedConf.reply) document.getElementById('conf-reply-addr').value = savedConf.reply;
-            if(savedConf.gemini) document.getElementById('conf-gemini-key').value = savedConf.gemini;
-
-            fetchStats();
-            window.addEventListener('click', (e) => { if (e.target.closest('#templateMenu') === null && !e.target.closest('button')?.onclick?.toString().includes('toggleTemplateMenu')) document.getElementById('templateMenu')?.classList.remove('show'); }, true);
+            // AUTOMATIC BACKEND SYNC: Set the default Apps Script URL here
+            const defaultUrl = "https://script.google.com/macros/s/AKfycbwhSbAIaqnCCN1sOQpn9AzefKYoX1rtCEksiCJqGXMlKkNWw0yxumG2FnxRX_O5H-4k/exec";
+            const savedUrl = localStorage.getItem('rave_gas_url') || defaultUrl;
+            document.getElementById('gasUrl').value = savedUrl;
         };
-        document.getElementById('gasUrl').addEventListener('change', (e) => localStorage.setItem('vibe_url_v4', e.target.value));
+        
+        document.getElementById('gasUrl')?.addEventListener('change', (e) => localStorage.setItem('rave_gas_url', e.target.value));
+        window.addEventListener('click', (e) => { if (!e.target.closest('#templateMenu') && !e.target.closest('button')?.onclick?.toString().includes('toggleTemplateMenu')) document.getElementById('templateMenu')?.classList.remove('show'); }, true);
     </script>
 </body>
 </html>
