@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raveone Emailer | Professional CRM & Marketing</title>
+    <title>Raveone Emailer | Enterprise Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -11,32 +11,57 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     
     <style>
-        :root { --odoo-purple: #714B67; --odoo-teal: #017E84; --odoo-bg: #f0f2f5; --odoo-border: #dee2e6; }
+        :root {
+            --odoo-purple: #714B67;
+            --odoo-teal: #017E84;
+            --odoo-bg: #f0f2f5;
+            --odoo-border: #dee2e6;
+        }
         body { font-family: 'Roboto', sans-serif; background-color: var(--odoo-bg); color: #4c4c4c; margin: 0; overflow: hidden; }
+        
         #auth-overlay { position: fixed; inset: 0; background: var(--odoo-purple); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; transition: opacity 0.5s; }
         #auth-overlay.hidden { display: none; }
+
+        /* Navigation */
         .top-nav { background-color: var(--odoo-purple); height: 46px; display: flex; align-items: center; padding: 0 15px; color: white; position: sticky; top: 0; z-index: 50; }
         .nav-link { padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; opacity: 0.8; transition: all 0.2s; }
         .nav-link:hover { opacity: 1; background: rgba(0,0,0,0.1); }
         .nav-link.active { font-weight: bold; opacity: 1; border-bottom-color: var(--odoo-teal); background-color: rgba(0,0,0,0.1); }
+        
         .sub-nav { background-color: white; border-bottom: 1px solid #dee2e6; height: 44px; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        
+        /* Layout */
         .page-view { display: none; padding: 20px; max-width: 1600px; margin: 0 auto; height: calc(100vh - 90px); overflow-y: auto; }
         .page-view.active { display: block; }
         .odoo-card { background: white; border-radius: 4px; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        
+        /* Tables */
         .odoo-table thead { background: #f8f9fa; border-bottom: 2px solid #dee2e6; }
         .odoo-table th { padding: 10px 15px; font-size: 9px; text-transform: uppercase; color: #666; font-weight: bold; }
         .odoo-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .odoo-btn-primary { background-color: var(--odoo-purple); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 500; font-size: 12px; cursor: pointer; border: none; }
+        
+        /* Buttons */
+        .odoo-btn-primary { background-color: var(--odoo-purple); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 500; font-size: 12px; cursor: pointer; border: none; transition: background 0.2s; }
+        .odoo-btn-primary:hover { background-color: #5d3d54; }
+        .odoo-btn-primary:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        
         .odoo-btn-secondary { background-color: var(--odoo-teal); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 500; font-size: 12px; border: none; }
         .odoo-btn-ai { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 600; font-size: 12px; border: none; }
+
         .tag-pill { display: inline-block; background: #e7f3ff; color: #0061bd; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-right: 4px; }
         .status-pill { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+
         #logs { font-family: monospace; font-size: 10px; background: #1e293b; color: #34d399; padding: 12px; border-radius: 4px; height: 180px; overflow-y: auto; }
+
+        /* Modals */
         .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .custom-modal.show { display: flex; }
+
+        /* Dropdown */
         .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; width: 280px; z-index: 1000; margin-top: 4px; border: 1px solid var(--odoo-border); background: white; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .dropdown-menu.show { display: block; }
-        .ql-editor { font-family: 'Arial', sans-serif; font-size: 14px; }
+        
+        .ql-editor { font-family: 'Arial', sans-serif; font-size: 14px; min-height: 300px; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -53,7 +78,9 @@
     <!-- TOP NAVIGATION -->
     <header class="top-nav">
         <div class="flex items-center h-full w-full">
-            <div class="text-md font-bold mr-8">Raveone Emailer</div>
+            <div class="text-md font-bold mr-8 text-white flex items-center">
+                <i class="fas fa-layer-group mr-2 opacity-80"></i> Raveone Emailer
+            </div>
             <nav class="flex h-full">
                 <div onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-link active">Dashboard</div>
                 <div onclick="switchPage('crm')" id="nav-crm" class="nav-link">CRM</div>
@@ -62,8 +89,10 @@
                 <div onclick="switchPage('contacts')" id="nav-contacts" class="nav-link">Contacts</div>
                 <div onclick="switchPage('settings')" id="nav-settings" class="nav-link">Configuration</div>
             </nav>
-            <div class="ml-auto">
-                <button onclick="fetchStats()" class="bg-teal-600 hover:bg-teal-700 px-4 py-1.5 rounded text-[10px] font-bold shadow transition-all">SYNC ENGINE</button>
+            <div class="ml-auto flex items-center gap-3">
+                <button onclick="fetchStats()" class="bg-teal-600 hover:bg-teal-700 px-4 py-1.5 rounded text-[10px] font-bold shadow transition-all text-white">
+                    <i class="fas fa-sync-alt mr-1"></i> SYNC ENGINE
+                </button>
             </div>
         </div>
     </header>
@@ -75,9 +104,9 @@
             <span id="breadcrumb-active" class="text-gray-400 font-medium uppercase tracking-tight">Dashboard</span>
         </div>
         <div id="crm-pipeline-tabs" class="hidden flex space-x-2">
-            <button onclick="switchPipeline('Recruitment')" class="pipeline-btn bg-purple-50 text-purple-700 px-4 py-1 rounded text-xs font-bold border">Recruitment</button>
-            <button onclick="switchPipeline('Training')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border">Training</button>
-            <button onclick="switchPipeline('Consulting')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border">Consulting</button>
+            <button onclick="switchPipeline('Recruitment')" class="pipeline-btn bg-purple-50 text-purple-700 px-4 py-1 rounded text-xs font-bold border border-purple-100 hover:bg-purple-100">Recruitment</button>
+            <button onclick="switchPipeline('Training')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border border-gray-200 hover:bg-gray-100">Training</button>
+            <button onclick="switchPipeline('Consulting')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border border-gray-200 hover:bg-gray-100">Consulting</button>
         </div>
     </div>
 
@@ -105,11 +134,11 @@
 
             <div class="grid grid-cols-12 gap-6">
                 <div class="col-span-8">
-                    <div class="odoo-card h-full">
+                    <div class="odoo-card h-full flex flex-col">
                         <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                             <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wider">Mailing Queue Pulse</h3>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto flex-grow">
                             <table class="w-full odoo-table">
                                 <thead><tr><th>Campaign</th><th>Goal/Limit</th><th>Status</th><th class="text-right">Action</th></tr></thead>
                                 <tbody id="dash-queue-list"></tbody>
@@ -119,8 +148,11 @@
                 </div>
                 <div class="col-span-4">
                     <div class="odoo-card p-6 h-full flex flex-col">
-                        <h3 class="text-xs font-bold text-gray-700 uppercase mb-4 border-b pb-2">Operational Chatter</h3>
-                        <div id="logs" class="flex-grow"> > Raveone Enterprise CRM v5.5 Active.</div>
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="text-xs font-bold text-gray-700 uppercase">Operational Chatter</h3>
+                            <span class="text-[10px] text-gray-400">Live Logs</span>
+                        </div>
+                        <div id="logs" class="flex-grow"> > Raveone Enterprise CRM v6.4 Active.</div>
                     </div>
                 </div>
             </div>
@@ -131,14 +163,16 @@
             <div class="mb-6 flex justify-between items-center">
                 <h2 id="pipeline-title" class="text-xl font-bold text-gray-700">Recruitment Pipeline</h2>
                 <div class="flex space-x-2">
-                    <button onclick="fetchDeals()" class="bg-white border px-4 py-2 rounded text-xs font-bold shadow-sm">REFRESH CRM</button>
+                    <button onclick="fetchDeals()" class="bg-white border px-4 py-2 rounded text-xs font-bold shadow-sm hover:bg-gray-50"><i class="fas fa-sync mr-1"></i> REFRESH</button>
                     <button onclick="openModal('dealModal')" class="odoo-btn-primary font-bold shadow-md"><i class="fas fa-plus mr-2"></i> NEW OPPORTUNITY</button>
                 </div>
             </div>
             <div class="odoo-card overflow-hidden">
                 <table class="w-full odoo-table">
                     <thead><tr><th>Opportunity</th><th>Company</th><th>Value</th><th>Stage</th><th class="text-right">Action</th></tr></thead>
-                    <tbody id="crm-table-body"></tbody>
+                    <tbody id="crm-table-body">
+                        <tr><td colspan="5" class="text-center p-8 text-gray-400">Loading deals...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -161,6 +195,7 @@
         <section id="view-templates" class="page-view">
             <div class="mb-6 flex justify-between">
                 <button onclick="saveCurrentAsTemplate()" class="odoo-btn-primary font-bold shadow-md"><i class="fas fa-save mr-2"></i> SAVE NEW TEMPLATE</button>
+                <button onclick="fetchTemplates()" class="bg-white border px-4 py-2 rounded text-xs font-bold shadow-sm">REFRESH LIST</button>
             </div>
             <div class="odoo-card overflow-hidden">
                 <table class="w-full odoo-table">
@@ -174,7 +209,7 @@
         <section id="view-wizard" class="page-view">
             <div class="mb-4 flex justify-between">
                 <div class="flex space-x-2">
-                    <button onclick="saveCampaign()" class="odoo-btn-primary font-bold px-10 uppercase">Save & Sync</button>
+                    <button id="btn-save-camp" onclick="saveCampaign()" class="odoo-btn-primary font-bold px-10 uppercase">Save & Sync</button>
                     <button onclick="switchPage('campaigns')" class="bg-white border px-4 py-2 rounded text-xs font-bold">CANCEL</button>
                 </div>
                 <div class="flex space-x-2 relative">
@@ -189,30 +224,30 @@
             <div class="odoo-card p-10 shadow-xl">
                 <div class="grid grid-cols-2 gap-10 mb-6 border-b pb-8">
                     <div class="space-y-6">
-                        <input id="campName" type="text" placeholder="Campaign Name" class="text-2xl font-bold w-full outline-none">
-                        <input id="subA" type="text" placeholder="Email Subject" class="w-full border-b p-2 outline-none">
+                        <input id="campName" type="text" placeholder="Campaign Name" class="text-2xl font-bold w-full outline-none text-gray-700">
+                        <input id="subA" type="text" placeholder="Email Subject" class="w-full border-b p-2 outline-none text-lg">
                     </div>
                     <div class="bg-gray-50 p-6 rounded grid grid-cols-2 gap-4">
                         <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">DAILY LIMIT</label>
-                             <input id="campLimit" type="number" value="300" class="w-full border-b p-2 outline-none font-bold"></div>
+                             <input id="campLimit" type="number" value="300" class="w-full border-b p-2 outline-none font-bold bg-transparent"></div>
                         <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">SEGMENT</label>
-                             <input id="campSegment" type="text" placeholder="MSME" class="w-full border-b p-2 outline-none"></div>
+                             <input id="campSegment" type="text" placeholder="MSME" class="w-full border-b p-2 outline-none bg-transparent"></div>
                     </div>
                 </div>
 
                 <!-- SMART DRAFTER TOOLBAR -->
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex space-x-2">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase self-center mr-2">Insert Variables:</span>
-                        <button onclick="insertTag('{Name}')" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100">+ Name</button>
-                        <button onclick="insertTag('{Business}')" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100">+ Business</button>
-                        <button onclick="insertTag('{City}')" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100">+ City</button>
+                <div class="flex justify-between items-center mb-2 bg-gray-50 p-2 rounded">
+                    <div class="flex space-x-2 items-center">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase mr-2">Variables:</span>
+                        <button onclick="insertTag('{Name}')" class="bg-white border text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-50">+ Name</button>
+                        <button onclick="insertTag('{Business}')" class="bg-white border text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-50">+ Business</button>
+                        <button onclick="insertTag('{City}')" class="bg-white border text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-50">+ City</button>
                     </div>
-                    <button onclick="checkSpam()" class="text-xs font-bold text-orange-600 hover:text-orange-800"><i class="fas fa-shield-alt mr-1"></i> CHECK SPAM WORDS</button>
+                    <button onclick="checkSpam()" class="text-xs font-bold text-orange-600 hover:text-orange-800"><i class="fas fa-shield-alt mr-1"></i> CHECK SPAM</button>
                 </div>
 
-                <!-- Editor with increased height for HTML -->
-                <div id="editor" style="height: 400px;"></div>
+                <!-- Editor -->
+                <div id="editor"></div>
             </div>
         </section>
 
@@ -221,6 +256,7 @@
             <div class="mb-6 flex justify-between items-center">
                 <div class="flex space-x-3">
                     <button onclick="openModal('leadModal')" class="odoo-btn-primary font-bold">ADD CONTACT</button>
+                    <button onclick="fetchContacts()" class="bg-white border px-4 py-2 rounded text-xs font-bold hover:bg-gray-50"><i class="fas fa-sync mr-1"></i> REFRESH</button>
                     <button onclick="triggerImport()" class="odoo-btn-secondary font-bold">IMPORT CSV</button>
                     <button onclick="validateAudience()" class="bg-teal-50 border border-teal-200 text-teal-700 px-4 py-2 rounded text-xs font-bold">VALIDATE DNS</button>
                 </div>
@@ -229,7 +265,9 @@
             <div class="odoo-card overflow-hidden">
                 <table class="w-full odoo-table">
                     <thead><tr><th>Name</th><th>Email</th><th>Business</th><th>Tags</th><th class="text-right">Action</th></tr></thead>
-                    <tbody id="contact-list-body"></tbody>
+                    <tbody id="contact-list-body">
+                        <tr><td colspan="5" class="text-center p-8 text-gray-400">Loading contacts...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -237,14 +275,24 @@
         <!-- CONFIGURATION VIEW -->
         <section id="view-settings" class="page-view">
             <div class="max-w-5xl mx-auto space-y-6 pb-20">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0"><i class="fas fa-exclamation-triangle text-yellow-600"></i></div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700 font-bold">Setup Required</p>
+                            <p class="text-xs text-yellow-600 mt-1">Ensure your Google Apps Script URL is correct and you have deployed a "New Version" after any code changes.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="odoo-card p-8">
-                        <h3 class="text-xs font-bold text-purple-700 mb-6 uppercase tracking-widest border-b pb-2">1. Sender Identity</h3>
+                        <h3 class="text-xs font-bold text-purple-700 mb-6 uppercase tracking-widest border-b pb-2">1. Connection Settings</h3>
                         <div class="space-y-4">
                             <div><label class="block text-[10px] font-bold text-gray-400 mb-1">APPS SCRIPT URL</label>
-                                 <input id="conf-gas-url" type="password" class="w-full border-b p-2 font-mono text-xs outline-none"></div>
+                                 <input id="conf-gas-url" type="password" class="w-full border-b p-2 font-mono text-xs outline-none focus:border-purple-500"></div>
                             <div><label class="block text-[10px] font-bold text-gray-400 mb-1">MASTER KEY</label>
-                                 <input id="conf-master-key" type="password" class="w-full border-b p-2 font-mono text-xs outline-none"></div>
+                                 <input id="conf-master-key" type="password" class="w-full border-b p-2 font-mono text-xs outline-none focus:border-purple-500"></div>
                             <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">Official Sender Name</label><input id="conf-sender-name" type="text" class="w-full border-b p-2 outline-none text-sm" placeholder="e.g. Rajesh Rao"></div>
                             <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">Return Reply-To Address</label><input id="conf-reply-addr" type="text" class="w-full border-b p-2 outline-none text-sm" placeholder="e.g. rajesh@raveone.in"></div>
                         </div>
@@ -282,7 +330,7 @@
     <!-- MODALS -->
     <div id="dealModal" class="custom-modal">
         <div class="bg-white p-10 rounded shadow-2xl max-w-md w-full">
-            <h3 class="text-xl font-bold mb-8">New Opportunity</h3>
+            <h3 class="text-xl font-bold mb-8 text-purple-700">New Opportunity</h3>
             <div class="space-y-4">
                 <input id="dealName" type="text" placeholder="Project Name" class="w-full border-b p-2 outline-none">
                 <input id="dealCompany" type="text" placeholder="Company" class="w-full border-b p-2 outline-none">
@@ -302,23 +350,21 @@
                             <option value="New">New</option>
                             <option value="Discovery">Discovery</option>
                             <option value="Proposal">Proposal</option>
-                            <option value="Negotiation">Negotiation</option>
                             <option value="Won">Won</option>
-                            <option value="Lost">Lost</option>
                         </select>
                     </div>
                 </div>
             </div>
             <div class="flex justify-end mt-10 space-x-3">
                 <button onclick="closeModal('dealModal')" class="bg-gray-100 px-6 py-2 rounded text-xs font-bold">CANCEL</button>
-                <button onclick="saveDeal()" class="odoo-btn-primary px-8 py-2 rounded">CREATE</button>
+                <button id="btn-create-deal" onclick="saveDeal()" class="odoo-btn-primary px-8 py-2 rounded">CREATE</button>
             </div>
         </div>
     </div>
 
     <div id="leadModal" class="custom-modal">
         <div class="bg-white p-10 rounded shadow-2xl max-w-md w-full">
-            <h3 class="text-xl font-bold mb-8">Add Contact</h3>
+            <h3 class="text-xl font-bold mb-8 text-teal-700">Add Contact</h3>
             <div class="space-y-4">
                 <input id="lName" type="text" placeholder="Full Name" class="w-full border-b p-2 outline-none">
                 <input id="lEmail" type="email" placeholder="Email Address" class="w-full border-b p-2 outline-none">
@@ -327,7 +373,7 @@
             </div>
             <div class="flex justify-end mt-10 space-x-3">
                 <button onclick="closeModal('leadModal')" class="bg-gray-100 px-6 py-2 rounded text-xs font-bold">CANCEL</button>
-                <button onclick="saveLead()" class="odoo-btn-secondary px-8 py-2 rounded">ADD</button>
+                <button id="btn-create-lead" onclick="saveLead()" class="odoo-btn-secondary px-8 py-2 rounded">ADD</button>
             </div>
         </div>
     </div>
@@ -336,10 +382,37 @@
 
     <script>
         const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],['link','clean']] } });
-        let activePipeline = "Recruitment", deals = [], contacts = [], campaigns = [];
+        let activePipeline = "Recruitment", deals = [], contacts = [], campaigns = [], templates = [];
         
         // DEFAULT SIGNATURE HTML
-        const DEFAULT_SIG = `<br><br><div style="font-family: Arial, sans-serif; font-size: 13px;">Dr. Rajesh K Rao | Raveone Consultants</div>`;
+        const DEFAULT_SIG = `
+<br><br>
+<div style="font-family: Arial, sans-serif; font-size: 13px; color: #333; border-top: 1px solid #ddd; padding-top: 20px;">
+  <table style="border: none; border-collapse: collapse;">
+    <tr>
+      <td style="vertical-align: top; padding-right: 15px;">
+        <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1772668800&v=beta&t=QMkL9ZJug-QiTD3gYR1I6l-c_-djVKvkR44It4CqCc4" alt="Raveone Logo" width="80" style="border-radius: 4px;">
+      </td>
+      <td style="vertical-align: top; border-left: 2px solid #714B67; padding-left: 15px;">
+        <strong style="color: #714B67; font-size: 16px;">Raveone Consultants</strong><br>
+        <span style="font-weight: bold; color: #000;">Dr. Rajesh K Rao</span><br>
+        <span style="color: #666;">Founder and CEO</span><br><br>
+        <span style="color: #555;">
+          #32, 3rd Mn, Vinayaka Layout, 2nd Stage<br>
+          Nagarbhavi, 9th Blk, Bangalore - 560072
+        </span><br>
+        <div style="margin-top: 8px;">
+          📞 <strong style="color: #017E84;">9148 330 565</strong> <span style="font-size: 11px; color: #888;">(10:30 AM – 10 PM x 7D)</span><br>
+          ✉️ <a href="mailto:rajesh@raveone.in" style="color: #017E84; text-decoration: none;">rajesh@raveone.in</a><br>
+          🌐 <a href="http://www.raveone.in" style="color: #017E84; text-decoration: none;">www.raveone.in</a>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div style="font-size: 10px; color: #999; margin-top: 15px;">
+    To opt-out of future communications, please reply with "Unsubscribe".
+  </div>
+</div>`;
 
         function log(msg) {
             const div = document.getElementById('logs');
@@ -356,6 +429,8 @@
             document.getElementById('crm-pipeline-tabs').classList.toggle('hidden', id !== 'crm');
             if(id === 'crm') { renderCRM(); fetchDeals(); }
             if(id === 'contacts') { renderContacts(); fetchContacts(); }
+            if(id === 'campaigns') fetchCampaigns();
+            if(id === 'templates') { renderTemplates(); fetchTemplates(); }
             if(id === 'dashboard') fetchStats();
         }
 
@@ -366,56 +441,87 @@
             } else { alert("Access Denied"); }
         }
 
-        // --- CRM LOGIC --- //
+        // SMART DRAFTER TOOLS
+        function insertTag(tag) {
+            const range = quill.getSelection(true);
+            if (range) {
+                quill.insertText(range.index, tag);
+            } else {
+                quill.insertText(quill.getLength(), tag);
+            }
+        }
 
-        async function fetchDeals() {
+        function checkSpam() {
+            const text = quill.getText().toLowerCase();
+            const triggers = ['free', 'guarantee', 'winner', 'urgent', '$$$', 'click here', 'act now', 'buy now', '100%'];
+            const found = triggers.filter(t => text.includes(t));
+            if(found.length > 0) alert("Warning: Potential spam triggers found: " + found.join(", "));
+            else alert("Clean! No common spam triggers detected.");
+        }
+
+        // TEMPLATE LOGIC
+        function renderTemplates() {
+            const body = document.getElementById('template-list-body');
+            body.innerHTML = templates.map(t => `
+                <tr>
+                    <td><div class="font-bold">${t.name}</div></td>
+                    <td>${t.subject}</td>
+                    <td><span class="tag-pill">${t.category}</span></td>
+                    <td class="text-right">
+                        <button onclick="useTemplate('${t.id}')" class="text-teal-600 font-bold text-[10px] hover:underline mr-3">USE</button>
+                        <button onclick="deleteTemplate('${t.id}')" class="text-red-400 font-bold text-[10px] hover:underline">DELETE</button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" class="text-center p-8 text-gray-400">No templates found. Save a new one!</td></tr>';
+        }
+
+        async function fetchTemplates() {
             const url = document.getElementById('conf-gas-url').value;
             const key = document.getElementById('conf-master-key').value;
             if(!url) return;
-
             try {
-                const res = await fetch(`${url}?action=getDeals&key=${key}`);
+                const res = await fetch(`${url}?action=getTemplates&key=${key}`);
                 const data = await res.json();
                 if(Array.isArray(data)) {
-                    deals = data;
-                    renderCRM();
-                    log(`Synced ${deals.length} deals.`);
+                    templates = data;
+                    renderTemplates();
+                    // Update Dropdown
+                    const list = document.getElementById('template-dropdown-list');
+                    list.innerHTML = templates.map(t => `<button onclick="useTemplate('${t.id}'); toggleTemplateMenu()" class="w-full text-left p-2 hover:bg-gray-100 rounded text-xs">${t.name}</button>`).join('');
                 }
-            } catch(e) { log("Error fetching deals."); }
+            } catch(e) { log("Error fetching templates."); }
         }
 
-        async function saveDeal() {
-            const name = document.getElementById('dealName').value;
-            const business = document.getElementById('dealCompany').value;
-            const value = document.getElementById('dealValue').value;
-            const pipeline = document.getElementById('dealPipeline').value;
-            const stage = document.getElementById('dealStage').value;
-            
-            const newDeal = { id: Date.now().toString(), name, business, value, pipeline, stage };
-
-            // Optimistic Update
-            deals.push(newDeal);
-            closeModal('dealModal'); 
-            renderCRM(); 
-            
-            const url = document.getElementById('conf-gas-url').value;
-            const key = document.getElementById('conf-master-key').value;
-            
-            if(url) {
-                log("Saving Deal to Cloud...");
-                try {
-                    await fetch(url, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'saveDeal', key: key, deal: newDeal })
-                    });
-                    log("Deal saved successfully.");
-                } catch(e) { log("Error saving deal to Cloud."); }
+        function useTemplate(id) {
+            const t = templates.find(temp => temp.id === id);
+            if(t) {
+                openWizard();
+                document.getElementById('campName').value = t.name + " (Copy)";
+                document.getElementById('subA').value = t.subject;
+                quill.clipboard.dangerouslyPasteHTML(t.body);
+                log(`Loaded template: ${t.name}`);
             }
+        }
+
+        function toggleTemplateMenu() { document.getElementById('templateMenu').classList.toggle('show'); }
+        window.onclick = function(e) { if (!e.target.matches('.odoo-btn-secondary') && !e.target.matches('.fa-folder-open')) document.getElementById('templateMenu').classList.remove('show'); }
+
+        // CRM LOGIC
+        function switchPipeline(name) {
+            activePipeline = name;
+            document.getElementById('pipeline-title').innerText = name + " Pipeline";
+            renderCRM();
         }
 
         function renderCRM() {
             const body = document.getElementById('crm-table-body');
             const filtered = deals.filter(d => d.pipeline === activePipeline);
+            
+            if(filtered.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">No opportunities in this pipeline.</td></tr>';
+                return;
+            }
+
             body.innerHTML = filtered.map(d => `
                 <tr>
                     <td><div class="font-bold text-purple-700">${d.name}</div></td>
@@ -432,73 +538,96 @@
                     <td class="text-right"><button class="text-teal-600 font-bold text-[10px]">MANAGE</button></td>
                 </tr>
             `).join('');
-            document.getElementById('statCrmValue').innerText = `₹${deals.reduce((a, b) => a + (parseInt(b.value) || 0), 0).toLocaleString()}`;
+            
+            // Calculate Value
+            const total = deals.reduce((a, b) => a + (parseInt(b.value) || 0), 0);
+            document.getElementById('statCrmValue').innerText = `₹${total.toLocaleString()}`;
+        }
+
+        async function fetchDeals() {
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            if(!url) return;
+
+            log("Fetching deals...");
+            try {
+                const res = await fetch(`${url}?action=getDeals&key=${key}`);
+                const data = await res.json();
+                if(Array.isArray(data)) {
+                    deals = data;
+                    renderCRM();
+                    log(`Synced ${deals.length} deals.`);
+                } else if(data.error) {
+                    log("Error: " + data.error);
+                }
+            } catch(e) { log("Network Error fetching deals."); }
+        }
+
+        async function saveDeal() {
+            const btn = document.getElementById('btn-create-deal');
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            const newDeal = {
+                id: Date.now().toString(),
+                name: document.getElementById('dealName').value,
+                business: document.getElementById('dealCompany').value,
+                value: document.getElementById('dealValue').value,
+                pipeline: document.getElementById('dealPipeline').value,
+                stage: document.getElementById('dealStage').value
+            };
+
+            // Send to Backend
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            
+            if(url) {
+                try {
+                    await fetch(url, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'saveDeal', key: key, deal: newDeal })
+                    });
+                    log("Deal saved to Backend.");
+                    // Update Local
+                    deals.push(newDeal);
+                    closeModal('dealModal'); 
+                    renderCRM();
+                } catch(e) {
+                    log("Error saving deal. Check connection.");
+                }
+            } else {
+                log("No Backend URL configured.");
+            }
+            btn.innerText = "CREATE";
+            btn.disabled = false;
         }
 
         async function updateDealStage(id, newStage) {
             const deal = deals.find(d => d.id == id);
             if(deal) {
                 deal.stage = newStage;
-                log(`Updated deal stage to ${newStage}`);
-                
+                log(`Updating stage for ${deal.name}...`);
                 const url = document.getElementById('conf-gas-url').value;
                 const key = document.getElementById('conf-master-key').value;
                 if(url) {
-                    await fetch(url, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'updateDealStage', key: key, id: id, stage: newStage })
-                    });
+                    try {
+                        await fetch(url, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'updateDealStage', key: key, id: id, stage: newStage })
+                        });
+                        log("Stage updated in Backend.");
+                    } catch(e) { log("Failed to sync stage update."); }
                 }
             }
         }
 
-        // --- CONTACT LOGIC --- //
-
-        async function fetchContacts() {
-            const url = document.getElementById('conf-gas-url').value;
-            const key = document.getElementById('conf-master-key').value;
-            if(!url) return;
-
-            try {
-                const res = await fetch(`${url}?action=getContacts&key=${key}`);
-                const data = await res.json();
-                if(Array.isArray(data)) {
-                    contacts = data;
-                    renderContacts();
-                    log(`Synced ${contacts.length} contacts.`);
-                }
-            } catch(e) { log("Error fetching contacts."); }
-        }
-
-        async function saveLead() {
-            const name = document.getElementById('lName').value;
-            const email = document.getElementById('lEmail').value;
-            const business = document.getElementById('lBusiness').value;
-            const tag = document.getElementById('lTags').value || 'New';
-
-            const newContact = { name, email, business, tag };
-            
-            contacts.push(newContact);
-            closeModal('leadModal'); 
-            renderContacts(); 
-            
-            const url = document.getElementById('conf-gas-url').value;
-            const key = document.getElementById('conf-master-key').value;
-            
-            if(url) {
-                log("Saving Contact to Cloud...");
-                try {
-                    await fetch(url, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'saveContact', key: key, contact: newContact })
-                    });
-                    log("Contact saved successfully.");
-                } catch(e) { log("Error saving contact."); }
-            }
-        }
-
+        // CONTACT LOGIC
         function renderContacts() {
             const body = document.getElementById('contact-list-body');
+            if(contacts.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">No contacts found. Add one or import CSV.</td></tr>';
+                return;
+            }
             body.innerHTML = contacts.map(c => `
                 <tr>
                     <td><div class="font-bold">${c.name}</div></td>
@@ -511,14 +640,60 @@
             document.getElementById('statContacts').innerText = contacts.length;
         }
 
-        // --- UTILS --- //
+        async function fetchContacts() {
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            if(!url) return;
+
+            log("Fetching contacts...");
+            try {
+                const res = await fetch(`${url}?action=getContacts&key=${key}`);
+                const data = await res.json();
+                if(Array.isArray(data)) {
+                    contacts = data;
+                    renderContacts();
+                    log(`Synced ${contacts.length} contacts.`);
+                }
+            } catch(e) { log("Error fetching contacts."); }
+        }
+
+        async function saveLead() {
+            const btn = document.getElementById('btn-create-lead');
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            const newContact = { 
+                name: document.getElementById('lName').value,
+                email: document.getElementById('lEmail').value,
+                business: document.getElementById('lBusiness').value,
+                tag: document.getElementById('lTags').value || 'New'
+            };
+            
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            
+            if(url) {
+                try {
+                    await fetch(url, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'saveContact', key: key, contact: newContact })
+                    });
+                    log("Contact saved to Backend.");
+                    contacts.push(newContact);
+                    closeModal('leadModal'); 
+                    renderContacts(); 
+                } catch(e) { log("Error saving contact."); }
+            }
+            btn.innerText = "ADD";
+            btn.disabled = false;
+        }
+
+        // UTILS
         function openModal(id) { document.getElementById(id).classList.add('show'); }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
         function triggerImport() { document.getElementById('csvFile').click(); }
-        function handleCsvImport(e) { /* Simplified for brevity, same logic as before */ }
-        function switchPipeline(name) { activePipeline = name; renderCRM(); }
+        function handleCsvImport(e) { /* CSV Logic */ }
         function openWizard() { switchPage('wizard'); }
-        function toggleTemplateMenu() { document.getElementById('templateMenu').classList.toggle('show'); }
 
         async function fetchStats() {
             const url = document.getElementById('conf-gas-url').value;
@@ -528,7 +703,56 @@
                 const res = await fetch(`${url}?action=getStatus&key=${key}`);
                 const data = await res.json();
                 document.getElementById('statQuota').innerText = data.quota;
+                log("System Synced. Quota: " + data.quota);
             } catch(e) {}
+        }
+
+        async function saveCampaign() {
+            const btn = document.getElementById('btn-save-camp');
+            btn.innerText = "SAVING...";
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            
+            const bodyContent = quill.root.innerHTML;
+            const signature = document.getElementById('conf-footer').value;
+            
+            const payload = {
+                action: "saveCampaign", key: key,
+                campaign: { 
+                    name: document.getElementById('campName').value, 
+                    subject: document.getElementById('subA').value, 
+                    body: bodyContent + signature, 
+                    limit: document.getElementById('campLimit').value, 
+                    segment: document.getElementById('campSegment').value 
+                }
+            };
+            try {
+                await fetch(url, { method: 'POST', body: JSON.stringify(payload) });
+                log("Mailing Saved Successfully.");
+            } catch(e) { log("Failed to save mailing."); }
+            btn.innerText = "SAVE & SYNC";
+        }
+
+        async function saveCurrentAsTemplate() {
+            // Logic to save template using similar fetch pattern
+            // action: 'saveTemplate'
+            alert("To save a template, please build it in the editor first, then click save.");
+        }
+
+        async function refineAI() {
+            const aiKey = document.getElementById('conf-gemini-key').value;
+            if(!aiKey) return alert("Set Gemini AI Key in Settings");
+            const content = quill.getText();
+            log("AI analyzing...");
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${aiKey}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Rewrite this for an MSME business owner. Be persuasive, direct, and professional: " + content }] }] })
+                });
+                const data = await res.json();
+                quill.root.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
+                log("AI refinement applied.");
+            } catch(e) { log("AI Service error."); }
         }
 
         function saveSettings() {
@@ -542,7 +766,7 @@
         }
 
         window.onload = () => {
-            const hardcodedUrl = "https://script.google.com/macros/s/AKfycbwAdvst3n4SFF7b20I0gVzKqqdQCZ74O8LupNTlPr8XzbXxxEF11TbcDijMTfuOy2Mrqw/exec";
+            const hardcodedUrl = "https://script.google.com/macros/s/AKfycbzAKjSR2jXy1zzhZJPnuLRKIwQwkFG_PL-bZ3frZsIhowZlg18ywZBlq0vJCp_bwVdhag/exec";
             document.getElementById('conf-gas-url').value = localStorage.getItem('rave_gas_url') || hardcodedUrl;
             document.getElementById('conf-master-key').value = localStorage.getItem('rave_master_key') || "";
             document.getElementById('conf-gemini-key').value = localStorage.getItem('rave_gemini_key') || "";
@@ -550,8 +774,11 @@
             document.getElementById('conf-reply-addr').value = localStorage.getItem('rave_reply_addr') || "";
             document.getElementById('conf-footer').value = localStorage.getItem('rave_footer_text') || DEFAULT_SIG;
             
-            fetchDeals();
-            fetchContacts();
+            // Auto Load
+            if(document.getElementById('conf-gas-url').value) {
+                fetchDeals();
+                fetchContacts();
+            }
         };
     </script>
 </body>
