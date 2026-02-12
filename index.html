@@ -616,7 +616,7 @@
                 <div class="form-grid-3">
                     <div class="form-group">
                         <label>Apps Script URL</label>
-                        <input type="text" id="conf-gas-url" placeholder="https://script.google.com/macros/s/AKfycbw-BCKTdVmrxdkMIxa4o7vnojE24Ezd_SDu9ynxNVSxAJnhAibHpWsqUetHHLZU6aeB9A/exec">
+                        <input type="text" id="conf-gas-url" placeholder="https://script.google.com/macros/s/AKfycby_M2yiFcD6sIev_F6ATl8kf_qB3AXR9I-DJvugVTHWEmYHEuE-OI3QI--helvev23GkQ/exec">
                     </div>
                     <div class="form-group">
                         <label>Master Key</label>
@@ -1008,7 +1008,7 @@
 
     // ---------- Load settings from localStorage ----------
     window.addEventListener('load', () => {
-        const defaultUrl = 'https://script.google.com/macros/s/AKfycbw-BCKTdVmrxdkMIxa4o7vnojE24Ezd_SDu9ynxNVSxAJnhAibHpWsqUetHHLZU6aeB9A/exec'; // 🔁 REPLACE WITH YOUR DEPLOYED URL
+        const defaultUrl = 'https://script.google.com/macros/s/AKfycby_M2yiFcD6sIev_F6ATl8kf_qB3AXR9I-DJvugVTHWEmYHEuE-OI3QI--helvev23GkQ/exec'; // 🔁 REPLACE WITH YOUR DEPLOYED URL
         document.getElementById('conf-gas-url').value = localStorage.getItem('rave_conf-gas-url') || defaultUrl;
         document.getElementById('conf-master-key').value = localStorage.getItem('rave_conf-master-key') || '';
         document.getElementById('conf-sender-name').value = localStorage.getItem('rave_conf-sender-name') || 'Raveone Consultants';
