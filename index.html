@@ -3,682 +3,1005 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raveone Emailer | Enterprise Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Raveone Emailer · ERPNext‑Style Desk</title>
+
+    <!-- Oat UI – ultra‑light, semantic, zero dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/oat-ui@latest/dist/oat.min.css">
+
+    <!-- Alpine.js – reactive, declarative -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Font Awesome 6 – ERPNext‑style icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Font: Inter – modern, clean -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Quill.js – rich text editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <style>
+        /* ---------- ERPNext / Frappe Design System (V13/V15 Espresso) ---------- */
         :root {
-            --odoo-purple: #714B67;
-            --odoo-teal: #017E84;
-            --odoo-bg: #f0f2f5;
-            --odoo-border: #dee2e6;
+            --brand-blue: #2563eb;
+            --brand-blue-dark: #1e40af;
+            --brand-blue-light: #dbeafe;
+            --bg-page: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --bg-sidebar-hover: #f3f4f6;
+            --bg-active: #eff6ff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-light: #f0f0f0;
+            --shadow-card: 0 2px 6px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.04);
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--odoo-bg); color: #4c4c4c; margin: 0; overflow: hidden; }
-        #auth-overlay { position: fixed; inset: 0; background: var(--odoo-purple); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; transition: opacity 0.5s; }
-        #auth-overlay.hidden { display: none; }
-        .top-nav { background-color: var(--odoo-purple); height: 46px; display: flex; align-items: center; padding: 0 15px; color: white; position: sticky; top: 0; z-index: 50; }
-        .nav-link { padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; opacity: 0.8; transition: all 0.2s; }
-        .nav-link:hover { opacity: 1; background: rgba(0,0,0,0.1); }
-        .nav-link.active { font-weight: bold; opacity: 1; border-bottom-color: var(--odoo-teal); background-color: rgba(0,0,0,0.1); }
-        .sub-nav { background-color: white; border-bottom: 1px solid #dee2e6; height: 44px; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .page-view { display: none; padding: 20px; max-width: 1600px; margin: 0 auto; height: calc(100vh - 90px); overflow-y: auto; }
-        .page-view.active { display: block; }
-        .odoo-card { background: white; border-radius: 4px; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .odoo-table thead { background: #f8f9fa; border-bottom: 2px solid #dee2e6; }
-        .odoo-table th { padding: 10px 15px; font-size: 9px; text-transform: uppercase; color: #666; font-weight: bold; }
-        .odoo-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .odoo-btn-primary { background-color: var(--odoo-purple); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 500; font-size: 12px; cursor: pointer; border: none; transition: background 0.2s; }
-        .odoo-btn-primary:hover { background-color: #5d3d54; }
-        .odoo-btn-secondary { background-color: var(--odoo-teal); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 500; font-size: 12px; border: none; }
-        .odoo-btn-ai { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 8px 16px; border-radius: 3px; font-weight: 600; font-size: 12px; border: none; }
-        .tag-pill { display: inline-block; background: #e7f3ff; color: #0061bd; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-right: 4px; }
-        .status-pill { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        #logs { font-family: monospace; font-size: 10px; background: #1e293b; color: #34d399; padding: 12px; border-radius: 4px; height: 180px; overflow-y: auto; }
-        .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .custom-modal.show { display: flex; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; width: 280px; z-index: 1000; margin-top: 4px; border: 1px solid var(--odoo-border); background: white; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .dropdown-menu.show { display: block; }
-        .ql-editor { font-family: 'Arial', sans-serif; font-size: 14px; min-height: 300px; }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #111827;
+                --bg-card: #1f2937;
+                --bg-sidebar: #1f2937;
+                --bg-sidebar-hover: #374151;
+                --bg-active: #2563eb20;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-muted: #9ca3af;
+                --border-light: #374151;
+                --shadow-card: 0 4px 12px rgba(0,0,0,0.2);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+        [x-cloak] { display: none !important; }
+
+        /* ERPNext Desk Layout */
+        .erp-desk { display: flex; min-height: 100vh; }
+
+        /* ---------- Left Sidebar (Persistent) ---------- */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .sidebar-header i {
+            font-size: 1.75rem;
+            color: var(--brand-blue);
+        }
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0 0.75rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.1s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-item i {
+            width: 1.5rem;
+            color: var(--text-muted);
+        }
+        .nav-item:hover {
+            background: var(--bg-sidebar-hover);
+            color: var(--text-primary);
+        }
+        .nav-item.active {
+            background: var(--bg-active);
+            color: var(--brand-blue);
+            font-weight: 600;
+        }
+        .nav-item.active i {
+            color: var(--brand-blue);
+        }
+
+        /* ---------- Main Content Area ---------- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: var(--bg-page);
+            overflow-y: auto;
+        }
+
+        /* ERPNext‑style cards */
+        .frappe-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-card);
+            transition: box-shadow 0.2s;
+        }
+        .frappe-card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* KPI grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-item {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-card);
+        }
+        .kpi-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        /* ERPNext 3‑column form */
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.375rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px var(--brand-blue-light);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--brand-blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--brand-blue-dark);
+        }
+        .btn-secondary {
+            background: var(--bg-sidebar-hover);
+            color: var(--text-primary);
+        }
+
+        /* Tables */
+        .frappe-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .frappe-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .frappe-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+        .frappe-table tbody tr:hover {
+            background: var(--bg-sidebar-hover);
+        }
+
+        /* Status pills */
+        .status-pill {
+            display: inline-block;
+            padding: 0.2rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pill.running { background: #dcfce7; color: #166534; }
+        .status-pill.draft { background: #f3f4f6; color: #4b5563; }
+        @media (prefers-color-scheme: dark) {
+            .status-pill.running { background: #14532d; color: #bbf7d0; }
+            .status-pill.draft { background: #374151; color: #e5e7eb; }
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 480px;
+            max-width: 90%;
+        }
+
+        /* Quill editor customization */
+        .ql-editor {
+            min-height: 300px;
+            font-family: var(--font-sans);
+        }
+        .ql-toolbar {
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            border-color: var(--border-light) !important;
+        }
+        .ql-container {
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            border-color: var(--border-light) !important;
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body>
 
-    <!-- LOGIN OVERLAY -->
-    <div id="auth-overlay">
-        <h2 class="text-xl font-bold mb-4">Secure Portal Login</h2>
-        <div class="bg-white p-6 rounded shadow-2xl w-80">
-            <input id="authTokenInput" type="password" placeholder="Enter Access Token" class="w-full border-b border-gray-300 p-2 mb-4 outline-none text-black font-bold text-center">
-            <button onclick="attemptLogin()" class="w-full odoo-btn-primary py-3 uppercase tracking-widest">Verify Access</button>
+<!-- ========== ALPINE STORE INITIALIZATION ========== -->
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('auth', { authenticated: false });
+
+        // ---------- Dummy Data – replace with your JSONP calls ----------
+        Alpine.store('stats', {
+            total: 2847,
+            quota: 1500,
+            pipelineValue: 1245000
+        });
+
+        Alpine.store('campaigns', [
+            { id: 1, name: 'Training Announcement', subject: 'New batch starting soon', status: 'Running', limit: 500, segment: 'MSME' },
+            { id: 2, name: 'Welcome Series', subject: 'Welcome to Raveone', status: 'Draft', limit: 300, segment: 'New' }
+        ]);
+
+        Alpine.store('deals', [
+            { id: 1, name: 'HireGrow Onboarding', business: 'HireGrow', value: 450000, pipeline: 'Recruitment', stage: 'Discovery', contactEmail: 'client@hiregrow.com' },
+            { id: 2, name: 'Training Module', business: 'MSME Institute', value: 120000, pipeline: 'Training', stage: 'Proposal' }
+        ]);
+
+        Alpine.store('templates', [
+            { id: 1, name: 'Welcome Email', subject: 'Welcome!', category: 'Onboarding', body: '<p>Hi {Name}, welcome to Raveone.</p>' },
+            { id: 2, name: 'Promo', subject: 'Special offer', category: 'Marketing', body: '<p>Check out our new training programs.</p>' }
+        ]);
+
+        Alpine.store('contacts', [
+            { email: 'client@hiregrow.com', name: 'Rajesh Kumar', business: 'HireGrow' },
+            { email: 'contact@msme.in', name: 'Priya Sharma', business: 'MSME Institute' }
+        ]);
+    });
+</script>
+
+<!-- ========== AUTH OVERLAY ========== -->
+<div x-data="{ token: '' }" 
+     x-show="!$store.auth.authenticated" 
+     x-cloak
+     class="modal-overlay" style="background: rgba(17,24,39,0.95); backdrop-filter: blur(4px);">
+    <div class="modal-content" style="width: 400px;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <i class="fas fa-cube" style="font-size: 2rem; color: var(--brand-blue);"></i>
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin:0;">Raveone</h2>
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Enter your access token to continue.</p>
+        <input type="password" x-model="token" placeholder="Access token" 
+               style="width:100%; padding:0.75rem 1rem; border:1px solid var(--border-light); border-radius:0.5rem; margin-bottom:1.5rem; background: var(--bg-card); color: var(--text-primary);">
+        <button @click="
+            if (token === 'RAVE-ACCESS-2025') {
+                $store.auth.authenticated = true;
+            } else {
+                alert('Access denied');
+            }
+        " class="btn btn-primary" style="width:100%;">
+            <i class="fas fa-key"></i> Verify Access
+        </button>
+    </div>
+</div>
+
+<!-- ========== MAIN DESK – ERPNext LAYOUT ========== -->
+<div x-data="{ 
+        activeNav: 'dashboard',
+        showDealModal: false,
+        showTemplateMenu: false,
+        quill: null
+     }" 
+     x-show="$store.auth.authenticated" 
+     x-cloak
+     class="erp-desk"
+     x-init="
+        // Initialize Quill when wizard page becomes active
+        $watch('activeNav', value => {
+            if (value === 'wizard' && !quill) {
+                setTimeout(() => {
+                    quill = new Quill('#editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                [{ header: [1,2,3,false] }],
+                                ['bold', 'italic', 'underline'],
+                                ['link', 'clean']
+                            ]
+                        }
+                    });
+                }, 50);
+            }
+        });
+     ">
+
+    <!-- ========== SIDEBAR NAVIGATION ========== -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-cube"></i>
+            <h1>Raveone</h1>
+        </div>
+        <div class="sidebar-nav">
+            <button @click="activeNav = 'dashboard'" 
+                    class="nav-item" 
+                    :class="{ 'active': activeNav === 'dashboard' }">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </button>
+            <button @click="activeNav = 'crm'" 
+                    class="nav-item"
+                    :class="{ 'active': activeNav === 'crm' }">
+                <i class="fas fa-users"></i>
+                <span>CRM</span>
+            </button>
+            <button @click="activeNav = 'campaigns'" 
+                    class="nav-item"
+                    :class="{ 'active': activeNav === 'campaigns' }">
+                <i class="fas fa-paper-plane"></i>
+                <span>Mailings</span>
+            </button>
+            <button @click="activeNav = 'templates'" 
+                    class="nav-item"
+                    :class="{ 'active': activeNav === 'templates' }">
+                <i class="fas fa-file-alt"></i>
+                <span>Templates</span>
+            </button>
+            <button @click="activeNav = 'settings'" 
+                    class="nav-item"
+                    :class="{ 'active': activeNav === 'settings' }">
+                <i class="fas fa-cog"></i>
+                <span>Configuration</span>
+            </button>
+            <button @click="activeNav = 'wizard'" 
+                    class="nav-item"
+                    :class="{ 'active': activeNav === 'wizard' }">
+                <i class="fas fa-pen"></i>
+                <span>Composer</span>
+            </button>
+        </div>
+        <div style="padding: 1.5rem 1.5rem 0; border-top: 1px solid var(--border-light); margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-cloud"></i>
+                <span x-text="$store.stats.quota + ' / 1500 daily'"></span>
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+                <span x-text="$store.stats.total + ' contacts'"></span>
+            </div>
         </div>
     </div>
 
-    <!-- TOP NAVIGATION -->
-    <header class="top-nav">
-        <div class="flex items-center h-full w-full">
-            <div class="text-md font-bold mr-8 text-white flex items-center">
-                <i class="fas fa-layer-group mr-2 opacity-80"></i> Raveone Emailer
+    <!-- ========== MAIN CONTENT AREA ========== -->
+    <div class="main-content">
+
+        <!-- ===== DASHBOARD PAGE ===== -->
+        <div x-show="activeNav === 'dashboard'">
+            <div class="kpi-grid">
+                <div class="kpi-item">
+                    <div class="kpi-label">Total Contacts</div>
+                    <div class="kpi-value" x-text="$store.stats.total.toLocaleString()"></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-label">Pipeline Value</div>
+                    <div class="kpi-value" x-text="'₹' + $store.stats.pipelineValue.toLocaleString()"></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-label">Daily Quota</div>
+                    <div class="kpi-value" x-text="$store.stats.quota"></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-label">Active Drips</div>
+                    <div class="kpi-value" x-text="$store.campaigns.filter(c => c.status === 'Running').length"></div>
+                </div>
             </div>
-            <nav class="flex h-full">
-                <div onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-link active">Dashboard</div>
-                <div onclick="switchPage('crm')" id="nav-crm" class="nav-link">CRM</div>
-                <div onclick="switchPage('campaigns')" id="nav-campaigns" class="nav-link">Mailings</div>
-                <div onclick="switchPage('templates')" id="nav-templates" class="nav-link">Templates</div>
-                <div onclick="switchPage('contacts')" id="nav-contacts" class="nav-link">Contacts</div>
-                <div onclick="switchPage('settings')" id="nav-settings" class="nav-link">Configuration</div>
-            </nav>
-            <div class="ml-auto flex items-center gap-3">
-                <button onclick="syncEngine()" class="bg-teal-600 hover:bg-teal-700 px-4 py-1.5 rounded text-[10px] font-bold shadow transition-all text-white">
-                    <i class="fas fa-sync-alt mr-1"></i> SYNC ENGINE
+
+            <div class="frappe-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 600;">📬 Recent Mailings</h3>
+                    <button @click="activeNav = 'campaigns'" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Campaign
+                    </button>
+                </div>
+                <table class="frappe-table">
+                    <thead>
+                        <tr><th>Name</th><th>Subject</th><th>Status</th><th>Limit</th></tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="c in $store.campaigns.slice(0,3)" :key="c.id">
+                            <tr>
+                                <td x-text="c.name"></td>
+                                <td x-text="c.subject"></td>
+                                <td><span class="status-pill" :class="c.status.toLowerCase()" x-text="c.status"></span></td>
+                                <td x-text="c.limit"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== CRM PAGE ===== -->
+        <div x-show="activeNav === 'crm'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">Deal Pipeline</h2>
+                <button @click="showDealModal = true" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Opportunity
                 </button>
             </div>
+
+            <!-- Pipeline tabs (static for now) -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <button class="btn btn-secondary">Recruitment</button>
+                <button class="btn btn-secondary">Training</button>
+                <button class="btn btn-secondary">Consulting</button>
+            </div>
+
+            <div class="frappe-card">
+                <table class="frappe-table">
+                    <thead>
+                        <tr><th>Opportunity</th><th>Company</th><th>Value</th><th>Contact</th><th>Stage</th></tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="d in $store.deals" :key="d.id">
+                            <tr>
+                                <td><span style="font-weight:600;" x-text="d.name"></span></td>
+                                <td x-text="d.business"></td>
+                                <td x-text="'₹' + d.value.toLocaleString()"></td>
+                                <td x-text="d.contactEmail || '—'"></td>
+                                <td>
+                                    <select @change="updateDealStage(d.id, $event.target.value)" 
+                                            style="background: var(--bg-sidebar-hover); border: none; padding: 0.25rem 0.75rem; border-radius: 2rem;">
+                                        <option value="New" :selected="d.stage === 'New'">New</option>
+                                        <option value="Discovery" :selected="d.stage === 'Discovery'">Discovery</option>
+                                        <option value="Proposal" :selected="d.stage === 'Proposal'">Proposal</option>
+                                        <option value="Won" :selected="d.stage === 'Won'">Won</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </header>
 
-    <div class="sub-nav text-sm flex justify-between">
-        <div class="flex items-center">
-            <span class="font-bold text-gray-600">Enterprise Workspace</span>
-            <span class="mx-2 text-gray-300">/</span>
-            <span id="breadcrumb-active" class="text-gray-400 font-medium uppercase tracking-tight">Dashboard</span>
+        <!-- ===== CAMPAIGNS PAGE ===== -->
+        <div x-show="activeNav === 'campaigns'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">Email Campaigns</h2>
+                <button @click="activeNav = 'wizard'" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Create New
+                </button>
+            </div>
+            <div class="frappe-card">
+                <table class="frappe-table">
+                    <thead>
+                        <tr><th>Name</th><th>Subject</th><th>Segment</th><th>Limit</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="c in $store.campaigns" :key="c.id">
+                            <tr>
+                                <td x-text="c.name"></td>
+                                <td x-text="c.subject"></td>
+                                <td x-text="c.segment || 'All'"></td>
+                                <td x-text="c.limit"></td>
+                                <td><span class="status-pill" :class="c.status.toLowerCase()" x-text="c.status"></span></td>
+                                <td>
+                                    <button @click="toggleCampaignStatus(c.id)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">
+                                        <span x-text="c.status === 'Running' ? 'Stop' : 'Start'"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div id="crm-pipeline-tabs" class="hidden flex space-x-2">
-            <button onclick="switchPipeline('Recruitment')" class="pipeline-btn bg-purple-50 text-purple-700 px-4 py-1 rounded text-xs font-bold border border-purple-100 hover:bg-purple-100">Recruitment</button>
-            <button onclick="switchPipeline('Training')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border border-gray-200 hover:bg-gray-100">Training</button>
-            <button onclick="switchPipeline('Consulting')" class="pipeline-btn bg-gray-50 text-gray-500 px-4 py-1 rounded text-xs font-bold border border-gray-200 hover:bg-gray-100">Consulting</button>
+
+        <!-- ===== TEMPLATES PAGE ===== -->
+        <div x-show="activeNav === 'templates'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">Template Library</h2>
+                <button @click="saveCurrentAsTemplate()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Current
+                </button>
+            </div>
+            <div class="frappe-card">
+                <table class="frappe-table">
+                    <thead>
+                        <tr><th>Name</th><th>Subject</th><th>Category</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="t in $store.templates" :key="t.id">
+                            <tr>
+                                <td x-text="t.name"></td>
+                                <td x-text="t.subject"></td>
+                                <td x-text="t.category || 'General'"></td>
+                                <td>
+                                    <button @click="useTemplate(t.id); activeNav = 'wizard'" class="btn btn-secondary" style="padding:0.25rem 0.75rem; margin-right:0.5rem;">
+                                        Use
+                                    </button>
+                                    <button @click="deleteTemplate(t.id)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="$store.templates.length === 0">
+                            <td colspan="4" style="text-align:center; color: var(--text-muted);">No templates yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <main class="flex-grow overflow-hidden">
-        <!-- DASHBOARD VIEW -->
-        <section id="view-dashboard" class="page-view active">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="odoo-card p-6 border-l-4 border-purple-500">
-                    <div class="text-[10px] font-bold text-gray-400 uppercase">Total Audience</div>
-                    <div id="statContacts" class="text-2xl font-bold">0</div>
-                </div>
-                <div class="odoo-card p-6 border-l-4 border-teal-500">
-                    <div class="text-[10px] font-bold text-gray-400 uppercase">Pipeline Value</div>
-                    <div id="statCrmValue" class="text-2xl font-bold">₹0</div>
-                </div>
-                <div class="odoo-card p-6 border-l-4 border-yellow-500">
-                    <div class="text-[10px] font-bold text-gray-400 uppercase">Google Quota</div>
-                    <div id="statQuota" class="text-2xl font-bold">0</div>
-                </div>
-                <div class="odoo-card p-6 border-l-4 border-blue-500">
-                    <div class="text-[10px] font-bold text-gray-400 uppercase">Active Drips</div>
-                    <div id="statActive" class="text-2xl font-bold">0</div>
-                </div>
-            </div>
-            <div class="grid grid-cols-12 gap-6">
-                <div class="col-span-8">
-                    <div class="odoo-card h-full flex flex-col">
-                        <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-                            <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wider">Mailing Queue Pulse</h3>
-                        </div>
-                        <div class="overflow-x-auto flex-grow">
-                            <table class="w-full odoo-table">
-                                <thead><tr><th>Campaign</th><th>Goal/Limit</th><th>Status</th><th class="text-right">Action</th></tr></thead>
-                                <tbody id="dash-queue-list"></tbody>
-                            </table>
-                        </div>
+        <!-- ===== SETTINGS PAGE (ERPNext 3‑column form) ===== -->
+        <div x-show="activeNav === 'settings'">
+            <h2 style="font-size:1.25rem; font-weight:600; margin-bottom:1.5rem;">Configuration</h2>
+            <div class="frappe-card">
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label>Apps Script URL</label>
+                        <input type="text" id="conf-gas-url" placeholder="https://script.google.com/macros/s/AKfycbw-BCKTdVmrxdkMIxa4o7vnojE24Ezd_SDu9ynxNVSxAJnhAibHpWsqUetHHLZU6aeB9A/exec">
+                    </div>
+                    <div class="form-group">
+                        <label>Master Key</label>
+                        <input type="password" id="conf-master-key" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label>Sender Name</label>
+                        <input type="text" id="conf-sender-name" placeholder="Raveone Consultants">
+                    </div>
+                    <div class="form-group">
+                        <label>Reply‑To</label>
+                        <input type="email" id="conf-reply-addr" placeholder="contact@yourdomain.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Unsubscribe URL</label>
+                        <input type="url" id="conf-unsubscribe-url" placeholder="https://yourdomain.com/unsubscribe?email={EMAIL}">
+                    </div>
+                    <div class="form-group">
+                        <label>Gemini API Key</label>
+                        <input type="password" id="conf-gemini-key" placeholder="AI key">
+                    </div>
+                    <div class="form-group">
+                        <label>Spam Delay</label>
+                        <select id="conf-spam-delay">
+                            <option value="1">1s (fast)</option>
+                            <option value="5" selected>5s (recommended)</option>
+                            <option value="10">10s (strict)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="conf-pixel" checked> Enable tracking pixel
+                        </label>
                     </div>
                 </div>
-                <div class="col-span-4">
-                    <div class="odoo-card p-6 h-full flex flex-col">
-                        <div class="flex justify-between items-center mb-4 border-b pb-2">
-                            <h3 class="text-xs font-bold text-gray-700 uppercase">Operational Chatter</h3>
-                            <span class="text-[10px] text-gray-400">Live Logs</span>
-                        </div>
-                        <div id="logs" class="flex-grow"> > Raveone Enterprise CRM v6.4 Active.</div>
-                    </div>
+                <div style="margin-top: 2rem;">
+                    <label>HTML Signature / Footer</label>
+                    <textarea id="conf-footer" rows="6" placeholder="<br><hr><div>... {UNSUBSCRIBE_URL} ...</div>"></textarea>
+                    <p style="font-size:0.75rem; color: var(--text-muted); margin-top:0.5rem;">Use {UNSUBSCRIBE_URL} placeholder. Saved to localStorage.</p>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                    <button @click="saveSettings()" class="btn btn-primary">Save All Settings</button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- CRM VIEW -->
-        <section id="view-crm" class="page-view">
-            <div class="mb-6 flex justify-between items-center">
-                <h2 id="pipeline-title" class="text-xl font-bold text-gray-700">Recruitment Pipeline</h2>
-                <div class="flex space-x-2">
-                    <button onclick="fetchDeals()" class="bg-white border px-4 py-2 rounded text-xs font-bold shadow-sm hover:bg-gray-50"><i class="fas fa-sync mr-1"></i> REFRESH</button>
-                    <button onclick="openModal('dealModal')" class="odoo-btn-primary font-bold shadow-md"><i class="fas fa-plus mr-2"></i> NEW OPPORTUNITY</button>
-                </div>
-            </div>
-            <div class="odoo-card overflow-hidden">
-                <table class="w-full odoo-table">
-                    <thead><tr><th>Opportunity</th><th>Company</th><th>Value</th><th>Stage</th><th class="text-right">Action</th></tr></thead>
-                    <tbody id="crm-table-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- MAILINGS LIST VIEW -->
-        <section id="view-campaigns" class="page-view">
-            <div class="mb-6 flex justify-between">
-                <button onclick="openWizard()" class="odoo-btn-primary font-bold shadow-md"><i class="fas fa-paper-plane mr-2"></i> CREATE NEW MAILING</button>
-                <button onclick="fetchCampaigns()" class="bg-white border px-4 py-2 rounded text-xs font-bold shadow-sm">REFRESH QUEUE</button>
-            </div>
-            <div class="odoo-card overflow-hidden">
-                <table class="w-full odoo-table">
-                    <thead><tr><th>Mailing Identity</th><th>Subject</th><th>Target Segment</th><th>Limit</th><th>Status</th><th class="text-right">Action</th></tr></thead>
-                    <tbody id="campaign-list-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- TEMPLATE LIBRARY VIEW -->
-        <section id="view-templates" class="page-view">
-            <div class="mb-6 flex justify-between">
-                <button onclick="saveCurrentAsTemplate()" class="odoo-btn-primary font-bold shadow-md"><i class="fas fa-save mr-2"></i> SAVE NEW TEMPLATE</button>
-                <button onclick="fetchTemplates()" class="bg-white border px-4 py-2 rounded text-xs font-bold shadow-sm">REFRESH LIST</button>
-            </div>
-            <div class="odoo-card overflow-hidden">
-                <table class="w-full odoo-table">
-                    <thead><tr><th>Template Name</th><th>Subject Line</th><th>Category</th><th class="text-right">Action</th></tr></thead>
-                    <tbody id="template-list-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- WIZARD VIEW -->
-        <section id="view-wizard" class="page-view">
-            <div class="mb-4 flex justify-between">
-                <div class="flex space-x-2">
-                    <button id="btn-save-camp" onclick="saveCampaign()" class="odoo-btn-primary font-bold px-10 uppercase">Save & Sync</button>
-                    <button onclick="switchPage('campaigns')" class="bg-white border px-4 py-2 rounded text-xs font-bold">CANCEL</button>
-                </div>
-                <div class="flex space-x-2 relative">
-                    <button onclick="toggleTemplateMenu()" class="odoo-btn-secondary font-bold shadow-sm"><i class="fas fa-folder-open mr-2"></i> LOAD TEMPLATE</button>
-                    <div id="templateMenu" class="dropdown-menu p-2">
-                        <div id="template-dropdown-list" class="space-y-1"></div>
-                    </div>
-                    <button onclick="refineAI()" class="odoo-btn-ai font-bold shadow-lg">✨ AI TONE REFINER</button>
-                </div>
-            </div>
-            <div class="odoo-card p-10 shadow-xl">
-                <div class="grid grid-cols-2 gap-10 mb-6 border-b pb-8">
-                    <div class="space-y-6">
-                        <input id="campName" type="text" placeholder="Campaign Name" class="text-2xl font-bold w-full outline-none text-gray-700">
-                        <input id="subA" type="text" placeholder="Email Subject" class="w-full border-b p-2 outline-none text-lg">
-                    </div>
-                    <div class="bg-gray-50 p-6 rounded grid grid-cols-2 gap-4">
-                        <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">DAILY LIMIT</label>
-                             <input id="campLimit" type="number" value="300" class="w-full border-b p-2 outline-none font-bold bg-transparent"></div>
-                        <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">SEGMENT</label>
-                             <input id="campSegment" type="text" placeholder="MSME" class="w-full border-b p-2 outline-none bg-transparent"></div>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mb-2 bg-gray-50 p-2 rounded">
-                    <div class="flex space-x-2 items-center">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase mr-2">Variables:</span>
-                        <button onclick="insertTag('{Name}')" class="bg-white border text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-50">+ Name</button>
-                        <button onclick="insertTag('{Business}')" class="bg-white border text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-50">+ Business</button>
-                        <button onclick="insertTag('{City}')" class="bg-white border text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-50">+ City</button>
-                    </div>
-                    <button onclick="checkSpam()" class="text-xs font-bold text-orange-600 hover:text-orange-800"><i class="fas fa-shield-alt mr-1"></i> CHECK SPAM</button>
-                </div>
-                <div id="editor"></div>
-            </div>
-        </section>
-
-        <!-- CONTACTS VIEW -->
-        <section id="view-contacts" class="page-view">
-            <div class="mb-6 flex justify-between items-center">
-                <div class="flex space-x-3">
-                    <button onclick="openModal('leadModal')" class="odoo-btn-primary font-bold">ADD CONTACT</button>
-                    <button onclick="fetchContacts()" class="bg-white border px-4 py-2 rounded text-xs font-bold hover:bg-gray-50"><i class="fas fa-sync mr-1"></i> REFRESH</button>
-                    <button onclick="triggerImport()" class="odoo-btn-secondary font-bold">IMPORT CSV</button>
-                    <button onclick="validateAudience()" class="bg-teal-50 border border-teal-200 text-teal-700 px-4 py-2 rounded text-xs font-bold">VALIDATE DNS</button>
-                </div>
-                <button onclick="scanBounces()" class="bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded text-xs font-bold">CLEAN BOUNCES</button>
-            </div>
-            <div class="odoo-card overflow-hidden">
-                <table class="w-full odoo-table">
-                    <thead><tr><th>Name</th><th>Email</th><th>Business</th><th>Tags</th><th class="text-right">Action</th></tr></thead>
-                    <tbody id="contact-list-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- CONFIGURATION VIEW -->
-        <section id="view-settings" class="page-view">
-            <div class="max-w-5xl mx-auto space-y-6 pb-20">
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0"><i class="fas fa-exclamation-triangle text-yellow-600"></i></div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700 font-bold">Setup Required</p>
-                            <p class="text-xs text-yellow-600 mt-1">Ensure your Google Apps Script URL is correct and you have deployed a "New Version" after any code changes.</p>
+        <!-- ===== WIZARD PAGE (Email Composer) ===== -->
+        <div x-show="activeNav === 'wizard'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size:1.25rem; font-weight:600;">Compose New Mailing</h2>
+                <div style="display: flex; gap: 0.75rem;">
+                    <!-- Template dropdown -->
+                    <div style="position: relative;">
+                        <button @click="showTemplateMenu = !showTemplateMenu" class="btn btn-secondary">
+                            <i class="fas fa-folder-open"></i> Load Template
+                        </button>
+                        <div x-show="showTemplateMenu" @click.away="showTemplateMenu = false" 
+                             style="position: absolute; right: 0; top: 100%; width: 280px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 0.5rem; padding: 0.5rem; margin-top: 0.25rem; z-index: 50;">
+                            <template x-for="t in $store.templates" :key="t.id">
+                                <button @click="useTemplate(t.id); showTemplateMenu = false" style="display: block; width:100%; text-align: left; padding: 0.5rem; border-radius:0.375rem;" class="btn btn-secondary">
+                                    <span x-text="t.name"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
+                    <button @click="refineAI()" class="btn btn-primary" style="background: linear-gradient(135deg,#6366f1,#a855f7);">
+                        ✨ AI Refine
+                    </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="odoo-card p-8">
-                        <h3 class="text-xs font-bold text-purple-700 mb-6 uppercase tracking-widest border-b pb-2">1. Connection Settings</h3>
-                        <div class="space-y-4">
-                            <div><label class="block text-[10px] font-bold text-gray-400 mb-1">APPS SCRIPT URL</label>
-                                 <input id="conf-gas-url" type="text" class="w-full border-b p-2 font-mono text-xs outline-none focus:border-purple-500"></div>
-                            <div><label class="block text-[10px] font-bold text-gray-400 mb-1">MASTER KEY</label>
-                                 <input id="conf-master-key" type="password" class="w-full border-b p-2 font-mono text-xs outline-none focus:border-purple-500"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">Official Sender Name</label><input id="conf-sender-name" type="text" class="w-full border-b p-2 outline-none text-sm" placeholder="e.g. Rajesh Rao"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">Return Reply-To Address</label><input id="conf-reply-addr" type="text" class="w-full border-b p-2 outline-none text-sm" placeholder="e.g. rajesh@raveone.in"></div>
-                        </div>
+            </div>
+
+            <div class="frappe-card" style="padding: 2rem;">
+                <!-- Campaign metadata -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div>
+                        <input type="text" id="campName" placeholder="Campaign name" 
+                               style="font-size: 1.5rem; font-weight: 600; border: none; border-bottom: 2px solid var(--border-light); width:100%; padding: 0.25rem 0;">
+                        <input type="text" id="subA" placeholder="Email subject" 
+                               style="margin-top: 1rem; width:100%;">
                     </div>
-                    <div class="space-y-6">
-                        <div class="odoo-card p-8">
-                            <h3 class="text-xs font-bold text-teal-700 mb-6 uppercase tracking-widest border-b pb-2">2. AI Service Settings</h3>
-                            <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">Gemini API Key</label><input id="conf-gemini-key" type="password" class="w-full border-b p-2 font-mono text-xs outline-none"></div>
-                        </div>
-                        <div class="odoo-card p-8">
-                            <h3 class="text-xs font-bold text-teal-700 mb-6 uppercase tracking-widest border-b pb-2">3. Deliverability Guard</h3>
-                            <div class="space-y-4">
-                                <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">Spam Delay (Seconds)</label>
-                                <select id="conf-spam-delay" class="w-full border-b p-2 outline-none bg-white text-sm"><option value="5" selected>5s (Safe)</option><option value="10">10s (Strict)</option></select></div>
-                                <label class="flex items-center space-x-3 cursor-pointer"><input id="conf-pixel" type="checkbox" checked class="w-4 h-4 text-teal-600"><span class="text-xs font-bold">Enable Tracking Pixels</span></label>
+                    <div style="background: var(--bg-sidebar-hover); padding: 1.5rem; border-radius: 1rem;">
+                        <div style="display: flex; gap: 1rem;">
+                            <div style="flex:1;">
+                                <label style="font-size:0.75rem; color: var(--text-secondary);">DAILY LIMIT</label>
+                                <input type="number" id="campLimit" value="300" style="width:100%;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:0.75rem; color: var(--text-secondary);">SEGMENT (tag)</label>
+                                <input type="text" id="campSegment" placeholder="e.g. MSME" style="width:100%;">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="odoo-card p-8">
-                    <h3 class="text-xs font-bold text-red-700 mb-6 uppercase tracking-widest border-b pb-2">4. Signature & Compliance Footer (HTML Supported)</h3>
-                    <div><label class="text-[10px] font-bold text-gray-500 mb-1 block">HTML Signature</label>
-                    <textarea id="conf-footer" class="w-full border-b p-2 h-64 text-[11px] outline-none font-mono bg-gray-50 rounded"></textarea></div>
-                    <p class="text-[10px] text-gray-400 mt-2">This HTML code will be appended to every email sent.</p>
-                </div>
-                <div class="flex justify-end pt-6"><button onclick="saveSettings()" class="odoo-btn-primary px-12 py-4 shadow-xl text-sm font-bold uppercase tracking-widest">Save All Changes</button></div>
-            </div>
-        </section>
-    </main>
 
-    <!-- MODALS -->
-    <div id="dealModal" class="custom-modal">
-        <div class="bg-white p-10 rounded shadow-2xl max-w-md w-full">
-            <h3 class="text-xl font-bold mb-8 text-purple-700">New Opportunity</h3>
-            <div class="space-y-4">
-                <input id="dealName" type="text" placeholder="Project Name" class="w-full border-b p-2 outline-none">
-                <input id="dealCompany" type="text" placeholder="Company" class="w-full border-b p-2 outline-none">
-                <input id="dealValue" type="number" placeholder="Value (₹)" class="w-full border-b p-2 outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] font-bold text-gray-500 mb-1 block uppercase">Pipeline</label>
-                        <select id="dealPipeline" class="w-full border-b p-2 outline-none bg-white font-bold">
-                            <option value="Recruitment">Recruitment</option>
-                            <option value="Training">Training</option>
-                            <option value="Consulting">Consulting</option>
-                        </select>
+                <!-- Editor toolbar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span style="font-size:0.75rem; color: var(--text-secondary);">Variables:</span>
+                        <button @click="insertTag('{Name}')" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">+ Name</button>
+                        <button @click="insertTag('{Business}')" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">+ Business</button>
+                        <button @click="insertTag('{City}')" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">+ City</button>
                     </div>
-                    <div><label class="text-[10px] font-bold text-gray-500 mb-1 block uppercase">Initial Stage</label>
-                        <select id="dealStage" class="w-full border-b p-2 outline-none bg-white font-bold text-teal-700">
-                            <option value="New">New</option>
-                            <option value="Discovery">Discovery</option>
-                            <option value="Proposal">Proposal</option>
-                            <option value="Won">Won</option>
-                        </select>
-                    </div>
+                    <button @click="checkSpam()" class="btn btn-secondary" style="color:#b45309;">
+                        ⚠️ Check Spam
+                    </button>
                 </div>
-            </div>
-            <div class="flex justify-end mt-10 space-x-3">
-                <button onclick="closeModal('dealModal')" class="bg-gray-100 px-6 py-2 rounded text-xs font-bold">CANCEL</button>
-                <button id="btn-create-deal" onclick="saveDeal()" class="odoo-btn-primary px-8 py-2 rounded">CREATE</button>
+
+                <!-- Quill editor container -->
+                <div id="editor" style="height: 320px;"></div>
+
+                <!-- Action buttons -->
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button @click="activeNav = 'campaigns'" class="btn btn-secondary">Cancel</button>
+                    <button @click="saveCampaign()" class="btn btn-primary">Save & Sync</button>
+                </div>
             </div>
         </div>
     </div>
-    <div id="leadModal" class="custom-modal">
-        <div class="bg-white p-10 rounded shadow-2xl max-w-md w-full">
-            <h3 class="text-xl font-bold mb-8 text-teal-700">Add Contact</h3>
-            <div class="space-y-4">
-                <input id="lName" type="text" placeholder="Full Name" class="w-full border-b p-2 outline-none">
-                <input id="lEmail" type="email" placeholder="Email Address" class="w-full border-b p-2 outline-none">
-                <input id="lBusiness" type="text" placeholder="Business Name" class="w-full border-b p-2 outline-none">
-                <input id="lTags" type="text" placeholder="Segments (MSME, Local, etc.)" class="w-full border-b p-2 outline-none">
+
+    <!-- ===== NEW DEAL MODAL (Alpine) ===== -->
+    <div x-show="showDealModal" x-cloak class="modal-overlay" @click.away="showDealModal = false">
+        <div class="modal-content">
+            <h3 style="margin-top:0; margin-bottom:1.5rem;">Create Opportunity</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="text" id="dealName" placeholder="Deal name">
+                <input type="text" id="dealCompany" placeholder="Company / Business">
+                <input type="number" id="dealValue" placeholder="Value (₹)">
+                <select id="dealPipeline">
+                    <option value="Recruitment">Recruitment</option>
+                    <option value="Training">Training</option>
+                    <option value="Consulting">Consulting</option>
+                </select>
+                <select id="dealStage">
+                    <option value="New">New</option>
+                    <option value="Discovery">Discovery</option>
+                    <option value="Proposal">Proposal</option>
+                    <option value="Won">Won</option>
+                </select>
+                <!-- Contact dropdown -->
+                <select id="dealContactEmail">
+                    <option value="">-- Link to contact (optional) --</option>
+                    <template x-for="contact in $store.contacts" :key="contact.email">
+                        <option :value="contact.email" x-text="contact.name + ' (' + contact.email + ')'"></option>
+                    </template>
+                </select>
             </div>
-            <div class="flex justify-end mt-10 space-x-3">
-                <button onclick="closeModal('leadModal')" class="bg-gray-100 px-6 py-2 rounded text-xs font-bold">CANCEL</button>
-                <button id="btn-create-lead" onclick="saveLead()" class="odoo-btn-secondary px-8 py-2 rounded">ADD</button>
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                <button @click="showDealModal = false" class="btn btn-secondary">Cancel</button>
+                <button @click="saveDeal(); showDealModal = false" class="btn btn-primary">Create Deal</button>
             </div>
         </div>
     </div>
-    <input type="file" id="csvFile" accept=".csv" class="hidden" onchange="handleCsvImport(event)">
+</div>
 
-    <script>
-        // ---------- GLOBAL STATE ----------
-        const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline'],['link','clean']] } });
-        let activePipeline = "Recruitment";
-        let deals = [], contacts = [], campaigns = [], templates = [];
-        const DEFAULT_SIG = `<br><br><div style="font-family: Arial, sans-serif; font-size: 13px; color: #333; border-top: 1px solid #ddd; padding-top: 20px;"><table style="border: none; border-collapse: collapse;"><tr><td style="vertical-align: top; padding-right: 15px;"><img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1772668800&v=beta&t=QMkL9ZJug-QiTD3gYR1I6l-c_-djVKvkR44It4CqCc4" alt="Raveone Logo" width="80" style="border-radius: 4px;"></td><td style="vertical-align: top; border-left: 2px solid #714B67; padding-left: 15px;"><strong style="color: #714B67; font-size: 16px;">Raveone Consultants</strong><br><span style="font-weight: bold; color: #000;">Dr. Rajesh K Rao</span><br><span style="color: #666;">Founder and CEO</span><br><br><span style="color: #555;">#32, 3rd Mn, Vinayaka Layout, 2nd Stage<br>Nagarbhavi, 9th Blk, Bangalore - 560072</span><br><div style="margin-top: 8px;">📞 <strong style="color: #017E84;">9148 330 565</strong> <span style="font-size: 11px; color: #888;">(10:30 AM – 10 PM x 7D)</span><br>✉️ <a href="mailto:rajesh@raveone.in" style="color: #017E84; text-decoration: none;">rajesh@raveone.in</a><br>🌐 <a href="http://www.raveone.in" style="color: #017E84; text-decoration: none;">www.raveone.in</a></div></td></tr></table><div style="font-size: 10px; color: #999; margin-top: 15px;">To opt-out of future communications, please reply with "Unsubscribe".</div></div>`;
-
-        // ---------- JSONP HELPER (CORS‑FREE) ----------
-        const pendingCallbacks = {};
-        let callbackCounter = 0;
-
-        function jsonp(url, callback) {
-            const cbName = 'jsonp_cb_' + (++callbackCounter);
-            return new Promise((resolve, reject) => {
-                pendingCallbacks[cbName] = { resolve, reject };
-                const script = document.createElement('script');
-                const separator = url.includes('?') ? '&' : '?';
-                script.src = url + separator + 'callback=' + cbName;
-                script.onload = () => { delete pendingCallbacks[cbName]; };
-                script.onerror = (err) => { 
-                    delete pendingCallbacks[cbName]; 
-                    reject(err);
-                };
-                document.head.appendChild(script);
-                // auto‑remove script after 5s
-                setTimeout(() => {
-                    if (pendingCallbacks[cbName]) {
-                        pendingCallbacks[cbName].reject(new Error('Timeout'));
-                        delete pendingCallbacks[cbName];
-                    }
-                }, 10000);
-            });
-        }
-
-        // JSONP global callback – will be called by the backend
-        window.jsonp_cb_handler = function(cbName, data) {
-            if (pendingCallbacks[cbName]) {
-                pendingCallbacks[cbName].resolve(data);
-                delete pendingCallbacks[cbName];
-            }
-        };
-
-        // ---------- UNIVERSAL API CALL (JSONP) ----------
-        async function apiCall(action, params = {}) {
-            const url = document.getElementById('conf-gas-url').value;
-            if (!url) throw new Error('Apps Script URL not configured');
-            const key = document.getElementById('conf-master-key').value || 'vibe-marketing-2024';
-            const searchParams = new URLSearchParams({
-                action: action,
-                key: key,
-                ...params
-            });
-            // Convert nested objects to JSON strings
-            Object.keys(params).forEach(k => {
-                if (typeof params[k] === 'object') searchParams.set(k, JSON.stringify(params[k]));
-            });
-            const fullUrl = `${url}?${searchParams.toString()}`;
-            const response = await jsonp(fullUrl);
-            if (response && response.error) throw new Error(response.error);
-            return response;
-        }
-
-        // ---------- LOGGING ----------
-        function log(msg) {
-            const div = document.getElementById('logs');
-            div.innerHTML = `> ${new Date().toLocaleTimeString()}: ${msg}<br>` + div.innerHTML;
-        }
-
-        // ---------- AUTH ----------
-        function attemptLogin() {
-            if (document.getElementById('authTokenInput').value === "RAVE-ACCESS-2025") {
-                document.getElementById('auth-overlay').classList.add('hidden');
-                syncEngine();
-            } else { alert("Access Denied"); }
-        }
-
-        // ---------- PAGE NAVIGATION ----------
-        function switchPage(id) {
-            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            if(document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
-            document.getElementById('breadcrumb-active').innerText = id;
-            document.getElementById('crm-pipeline-tabs').classList.toggle('hidden', id !== 'crm');
-            if(id === 'crm') { renderCRM(); fetchDeals(); }
-            if(id === 'contacts') { renderContacts(); fetchContacts(); }
-            if(id === 'campaigns') fetchCampaigns();
-            if(id === 'templates') { renderTemplates(); fetchTemplates(); }
-            if(id === 'dashboard') fetchStats();
-        }
-        function switchPipeline(name) { activePipeline = name; document.getElementById('pipeline-title').innerText = name + " Pipeline"; renderCRM(); }
-        function openModal(id) { document.getElementById(id).classList.add('show'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-        function triggerImport() { document.getElementById('csvFile').click(); }
-        function openWizard() { switchPage('wizard'); }
-
-        // ---------- DASHBOARD ----------
-        async function fetchStats() {
-            try {
-                const data = await apiCall('getStatus');
-                document.getElementById('statContacts').innerText = data.total || 0;
-                document.getElementById('statQuota').innerText = data.quota || 0;
-                document.getElementById('statCrmValue').innerText = '₹' + (data.pipelineValue || 0).toLocaleString();
-                log('Dashboard synced. Quota: ' + data.quota);
-            } catch(e) { log('Stats error: ' + e.message); }
-        }
-
-        // ---------- CRM ----------
-        async function fetchDeals() {
-            try {
-                const data = await apiCall('getDeals');
-                deals = Array.isArray(data) ? data : [];
-                renderCRM();
-                log(`Synced ${deals.length} deals.`);
-            } catch(e) { log('Fetch deals error: ' + e.message); }
-        }
-        function renderCRM() {
-            const body = document.getElementById('crm-table-body');
-            const filtered = deals.filter(d => d.pipeline === activePipeline);
-            if(filtered.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">No opportunities in this pipeline.</td></tr>';
-                return;
-            }
-            body.innerHTML = filtered.map(d => `<tr><td><div class="font-bold text-purple-700">${d.name}</div></td><td>${d.business}</td><td>₹${parseInt(d.value || 0).toLocaleString()}</td><td><select onchange="updateDealStage('${d.id}', this.value)" class="bg-purple-50 text-purple-700 p-1 rounded text-[10px] border-none outline-none cursor-pointer font-bold"><option value="New" ${d.stage === 'New' ? 'selected' : ''}>New</option><option value="Discovery" ${d.stage === 'Discovery' ? 'selected' : ''}>Discovery</option><option value="Proposal" ${d.stage === 'Proposal' ? 'selected' : ''}>Proposal</option><option value="Won" ${d.stage === 'Won' ? 'selected' : ''}>Won</option></select></td><td class="text-right"><button class="text-teal-600 font-bold text-[10px]">MANAGE</button></td></tr>`).join('');
-            const total = deals.reduce((a, b) => a + (parseInt(b.value) || 0), 0);
-            document.getElementById('statCrmValue').innerText = '₹' + total.toLocaleString();
-        }
-        async function saveDeal() {
-            const btn = document.getElementById('btn-create-deal');
-            btn.innerText = "Saving..."; btn.disabled = true;
-            const newDeal = {
-                id: Date.now().toString(),
-                name: document.getElementById('dealName').value,
-                business: document.getElementById('dealCompany').value,
-                value: document.getElementById('dealValue').value,
-                pipeline: document.getElementById('dealPipeline').value,
-                stage: document.getElementById('dealStage').value
+<!-- ========== JSONP & API HELPER FUNCTIONS ========== -->
+<script>
+    // ---------- JSONP – CORS‑free calls to Apps Script ----------
+    function jsonp(url) {
+        return new Promise((resolve, reject) => {
+            const cbName = 'jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).substring(2,7);
+            window[cbName] = function(data) {
+                resolve(data);
+                delete window[cbName];
+                if (script.parentNode) script.parentNode.removeChild(script);
             };
-            try {
-                await apiCall('saveDeal', { deal: newDeal });
-                deals.push(newDeal);
-                closeModal('dealModal');
-                renderCRM();
-                log('Deal saved.');
-            } catch(e) { log('Save deal error: ' + e.message); }
-            btn.innerText = "CREATE"; btn.disabled = false;
-        }
-        async function updateDealStage(id, stage) {
-            try {
-                await apiCall('updateDealStage', { id, stage });
-                const deal = deals.find(d => d.id == id);
-                if (deal) deal.stage = stage;
-                log(`Stage updated: ${id} → ${stage}`);
-            } catch(e) { log('Stage update error: ' + e.message); }
-        }
+            const script = document.createElement('script');
+            const separator = url.includes('?') ? '&' : '?';
+            script.src = url + separator + 'callback=' + cbName;
+            script.onerror = () => reject(new Error('JSONP failed'));
+            document.head.appendChild(script);
+            setTimeout(() => {
+                if (window[cbName]) {
+                    reject(new Error('JSONP timeout'));
+                    delete window[cbName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+            }, 15000);
+        });
+    }
 
-        // ---------- CONTACTS ----------
-        async function fetchContacts() {
-            try {
-                const data = await apiCall('getContacts');
-                contacts = Array.isArray(data) ? data : [];
-                renderContacts();
-                log(`Synced ${contacts.length} contacts.`);
-            } catch(e) { log('Fetch contacts error: ' + e.message); }
-        }
-        function renderContacts() {
-            const body = document.getElementById('contact-list-body');
-            if(contacts.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-gray-400">No contacts found.</td></tr>';
-                return;
-            }
-            body.innerHTML = contacts.map(c => `<tr><td><div class="font-bold">${c.name}</div></td><td class="text-gray-500">${c.email}</td><td>${c.business || '-'}</td><td>${(c.tag || '').split(',').map(t => `<span class="tag-pill">${t.trim()}</span>`).join('')}</td><td class="text-right"><button class="text-purple-600 underline text-[10px]">EDIT</button></td></tr>`).join('');
-            document.getElementById('statContacts').innerText = contacts.length;
-        }
-        async function saveLead() {
-            const btn = document.getElementById('btn-create-lead');
-            btn.innerText = "Saving..."; btn.disabled = true;
-            const newContact = { 
-                name: document.getElementById('lName').value,
-                email: document.getElementById('lEmail').value,
-                business: document.getElementById('lBusiness').value,
-                tag: document.getElementById('lTags').value || 'New'
-            };
-            try {
-                await apiCall('saveContact', { contact: newContact });
-                contacts.push(newContact);
-                closeModal('leadModal');
-                renderContacts();
-                log('Contact saved.');
-            } catch(e) { log('Save contact error: ' + e.message); }
-            btn.innerText = "ADD"; btn.disabled = false;
-        }
+    async function apiCall(action, params = {}) {
+        const url = document.getElementById('conf-gas-url')?.value;
+        if (!url) throw new Error('Apps Script URL not configured');
+        const key = document.getElementById('conf-master-key')?.value || 'vibe-marketing-2024';
+        const searchParams = new URLSearchParams({ action, key, ...params });
+        Object.keys(params).forEach(k => {
+            if (typeof params[k] === 'object') searchParams.set(k, JSON.stringify(params[k]));
+        });
+        const fullUrl = `${url}?${searchParams.toString()}`;
+        const response = await jsonp(fullUrl);
+        if (response?.error) throw new Error(response.error);
+        return response;
+    }
 
-        // ---------- TEMPLATES ----------
-        async function fetchTemplates() {
-            try {
-                const data = await apiCall('getTemplates');
-                templates = Array.isArray(data) ? data : [];
-                renderTemplates();
-                const list = document.getElementById('template-dropdown-list');
-                list.innerHTML = templates.map(t => `<button onclick="useTemplate('${t.id}'); toggleTemplateMenu()" class="w-full text-left p-2 hover:bg-gray-100 rounded text-xs">${t.name}</button>`).join('');
-            } catch(e) { log('Fetch templates error: ' + e.message); }
-        }
-        function renderTemplates() {
-            const body = document.getElementById('template-list-body');
-            body.innerHTML = templates.map(t => `<tr><td><div class="font-bold">${t.name}</div></td><td>${t.subject}</td><td><span class="tag-pill">${t.category || 'General'}</span></td><td class="text-right"><button onclick="useTemplate('${t.id}')" class="text-teal-600 font-bold text-[10px] hover:underline mr-3">USE</button><button onclick="deleteTemplate('${t.id}')" class="text-red-400 font-bold text-[10px] hover:underline">DELETE</button></td></tr>`).join('') || '<tr><td colspan="4" class="text-center p-8 text-gray-400">No templates found.</td></tr>';
-        }
-        async function deleteTemplate(id) {
-            if (!confirm('Delete template?')) return;
-            try {
-                await apiCall('deleteTemplate', { id });
-                templates = templates.filter(t => t.id != id);
-                renderTemplates();
-                log('Template deleted.');
-            } catch(e) { log('Delete template error: ' + e.message); }
-        }
-        function useTemplate(id) {
-            const t = templates.find(temp => temp.id == id);
-            if(t) {
-                openWizard();
-                document.getElementById('campName').value = t.name + " (Copy)";
-                document.getElementById('subA').value = t.subject;
-                quill.clipboard.dangerouslyPasteHTML(t.body);
-                log(`Loaded template: ${t.name}`);
-            }
-        }
-        async function saveCurrentAsTemplate() {
-            const name = prompt('Template name:');
-            if (!name) return;
-            const subject = document.getElementById('subA').value;
-            const body = quill.root.innerHTML;
-            const category = prompt('Category (e.g. Newsletter, Promo):') || 'General';
-            try {
-                await apiCall('saveTemplate', { template: { name, subject, body, category } });
-                await fetchTemplates();
-                log('Template saved.');
-            } catch(e) { log('Save template error: ' + e.message); }
-        }
-        function toggleTemplateMenu() { document.getElementById('templateMenu').classList.toggle('show'); }
-        window.onclick = function(e) { if (!e.target.matches('.odoo-btn-secondary') && !e.target.matches('.fa-folder-open')) document.getElementById('templateMenu').classList.remove('show'); }
-
-        // ---------- CAMPAIGNS ----------
-        async function fetchCampaigns() {
-            try {
-                const data = await apiCall('getCampaigns');
-                campaigns = Array.isArray(data) ? data : [];
-                renderCampaigns();
-                log(`Synced ${campaigns.length} campaigns.`);
-            } catch(e) { log('Fetch campaigns error: ' + e.message); }
-        }
-        function renderCampaigns() {
-            const body = document.getElementById('campaign-list-body');
-            body.innerHTML = campaigns.map(c => `<tr><td>${c.name}</td><td>${c.subject}</td><td>${c.segment || 'All'}</td><td>${c.limit || 300}</td><td><span class="status-pill ${c.status === 'Running' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${c.status || 'Draft'}</span></td><td class="text-right"><button onclick="toggleCampaignStatus('${c.id}', '${c.status === 'Running' ? 'Draft' : 'Running'}')" class="text-teal-600 font-bold text-[10px] hover:underline">${c.status === 'Running' ? 'STOP' : 'START'}</button></td></tr>`).join('');
-        }
-        async function saveCampaign() {
-            const btn = document.getElementById('btn-save-camp');
-            btn.innerText = "SAVING..."; btn.disabled = true;
-            const bodyContent = quill.root.innerHTML;
-            const signature = document.getElementById('conf-footer').value || DEFAULT_SIG;
-            try {
-                await apiCall('saveCampaign', {
-                    campaign: {
-                        name: document.getElementById('campName').value,
-                        subject: document.getElementById('subA').value,
-                        body: bodyContent + signature,
-                        limit: document.getElementById('campLimit').value,
-                        segment: document.getElementById('campSegment').value
-                    }
-                });
-                log('Campaign saved.');
-                switchPage('campaigns');
-            } catch(e) { log('Save campaign error: ' + e.message); }
-            btn.innerText = "SAVE & SYNC"; btn.disabled = false;
-        }
-        async function toggleCampaignStatus(id, status) {
-            try {
-                await apiCall('toggleCampaignStatus', { id, status });
-                const camp = campaigns.find(c => c.id == id);
-                if (camp) camp.status = status;
-                renderCampaigns();
-                log(`Campaign ${id} → ${status}`);
-            } catch(e) { log('Toggle status error: ' + e.message); }
-        }
-
-        // ---------- AI REFINER ----------
-        async function refineAI() {
-            const aiKey = document.getElementById('conf-gemini-key').value;
-            if(!aiKey) return alert('Set Gemini AI Key in Settings');
-            const content = quill.getText();
-            log('AI analyzing...');
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${aiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "Rewrite this for an MSME business owner. Be persuasive, direct, and professional: " + content }] }] })
-                });
-                const data = await response.json();
-                quill.root.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
-                log('AI refinement applied.');
-            } catch(e) { log('AI Service error: ' + e.message); }
-        }
-
-        // ---------- SETTINGS ----------
-        function saveSettings() {
-            localStorage.setItem('rave_gas_url', document.getElementById('conf-gas-url').value);
-            localStorage.setItem('rave_master_key', document.getElementById('conf-master-key').value);
-            localStorage.setItem('rave_gemini_key', document.getElementById('conf-gemini-key').value);
-            localStorage.setItem('rave_sender_name', document.getElementById('conf-sender-name').value);
-            localStorage.setItem('rave_reply_addr', document.getElementById('conf-reply-addr').value);
-            localStorage.setItem('rave_footer_text', document.getElementById('conf-footer').value);
-            alert('Settings Saved.');
-        }
-
-        // ---------- UTILITY ----------
-        function insertTag(tag) { const range = quill.getSelection(true); if (range) { quill.insertText(range.index, tag); } else { quill.insertText(quill.getLength(), tag); } }
-        function checkSpam() {
-            const text = quill.getText().toLowerCase();
-            const triggers = ['free', 'guarantee', 'winner', 'urgent', '$$$', 'click here', 'act now', 'buy now', '100%'];
-            const found = triggers.filter(t => text.includes(t));
-            if(found.length > 0) alert('Warning: Potential spam triggers found: ' + found.join(', '));
-            else alert('Clean! No common spam triggers detected.');
-        }
-        function syncEngine() { fetchStats(); fetchDeals(); fetchContacts(); fetchCampaigns(); fetchTemplates(); }
-        function handleCsvImport(e) { alert('CSV import not implemented in this demo.'); }
-        function validateAudience() { alert('DNS validation stub.'); }
-        function scanBounces() { alert('Bounce cleaning stub.'); }
-
-        // ---------- ON LOAD ----------
-        window.onload = () => {
-            const hardcodedUrl = "YOUR_APPS_SCRIPT_URL_HERE"; // <-- REPLACE with your deployed URL
-            document.getElementById('conf-gas-url').value = localStorage.getItem('rave_gas_url') || hardcodedUrl;
-            document.getElementById('conf-master-key').value = localStorage.getItem('rave_master_key') || "";
-            document.getElementById('conf-gemini-key').value = localStorage.getItem('rave_gemini_key') || "";
-            document.getElementById('conf-sender-name').value = localStorage.getItem('rave_sender_name') || "";
-            document.getElementById('conf-reply-addr').value = localStorage.getItem('rave_reply_addr') || "";
-            document.getElementById('conf-footer').value = localStorage.getItem('rave_footer_text') || DEFAULT_SIG;
-            if(document.getElementById('conf-gas-url').value && document.getElementById('conf-gas-url').value !== hardcodedUrl) syncEngine();
+    // ---------- Global functions for Alpine ----------
+    window.saveDeal = async function() {
+        const newDeal = {
+            id: Date.now().toString(),
+            name: document.getElementById('dealName')?.value,
+            business: document.getElementById('dealCompany')?.value,
+            value: document.getElementById('dealValue')?.value,
+            pipeline: document.getElementById('dealPipeline')?.value,
+            stage: document.getElementById('dealStage')?.value,
+            contactEmail: document.getElementById('dealContactEmail')?.value
         };
-    </script>
+        try {
+            await apiCall('saveDeal', { deal: newDeal });
+            Alpine.store('deals').push(newDeal);
+            log('Deal created (demo)');
+        } catch(e) {
+            console.error(e);
+            // Fallback: update local store anyway for demo
+            Alpine.store('deals').push(newDeal);
+        }
+    };
+
+    window.updateDealStage = async function(id, stage) {
+        try {
+            await apiCall('updateDealStage', { id, stage });
+            const deal = Alpine.store('deals').find(d => d.id == id);
+            if (deal) deal.stage = stage;
+        } catch(e) {
+            // Fallback for demo
+            const deal = Alpine.store('deals').find(d => d.id == id);
+            if (deal) deal.stage = stage;
+        }
+    };
+
+    window.toggleCampaignStatus = async function(id) {
+        const campaign = Alpine.store('campaigns').find(c => c.id == id);
+        const newStatus = campaign?.status === 'Running' ? 'Draft' : 'Running';
+        try {
+            await apiCall('toggleCampaignStatus', { id, status: newStatus });
+            if (campaign) campaign.status = newStatus;
+        } catch(e) {
+            if (campaign) campaign.status = newStatus;
+        }
+    };
+
+    window.saveCampaign = async function() {
+        const body = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill?.root?.innerHTML || '<p>Sample content</p>';
+        const signature = document.getElementById('conf-footer')?.value || '';
+        const unsubscribeBase = document.getElementById('conf-unsubscribe-url')?.value || '';
+        const finalBody = body + signature.replace(/{UNSUBSCRIBE_URL}/g, unsubscribeBase + '{EMAIL}');
+        
+        const newCampaign = {
+            id: Date.now(),
+            name: document.getElementById('campName')?.value || 'New Campaign',
+            subject: document.getElementById('subA')?.value || 'No subject',
+            body: finalBody,
+            limit: document.getElementById('campLimit')?.value || 300,
+            segment: document.getElementById('campSegment')?.value || '',
+            status: 'Draft'
+        };
+        try {
+            await apiCall('saveCampaign', { campaign: newCampaign });
+            Alpine.store('campaigns').push(newCampaign);
+            log('Campaign saved (demo)');
+        } catch(e) {
+            Alpine.store('campaigns').push(newCampaign);
+        }
+    };
+
+    window.saveCurrentAsTemplate = async function() {
+        const name = prompt('Template name:');
+        if (!name) return;
+        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        const subject = document.getElementById('subA')?.value || '';
+        const body = quill?.root?.innerHTML || '';
+        const category = prompt('Category:') || 'General';
+        const newTemplate = {
+            id: Date.now(),
+            name,
+            subject,
+            body,
+            category
+        };
+        try {
+            await apiCall('saveTemplate', { template: newTemplate });
+            Alpine.store('templates').push(newTemplate);
+            log('Template saved');
+        } catch(e) {
+            Alpine.store('templates').push(newTemplate);
+        }
+    };
+
+    window.deleteTemplate = async function(id) {
+        if (!confirm('Delete template?')) return;
+        try {
+            await apiCall('deleteTemplate', { id });
+            Alpine.store('templates', Alpine.store('templates').filter(t => t.id != id));
+        } catch(e) {
+            Alpine.store('templates', Alpine.store('templates').filter(t => t.id != id));
+        }
+    };
+
+    window.useTemplate = function(id) {
+        const t = Alpine.store('templates').find(t => t.id == id);
+        if (t) {
+            document.getElementById('campName').value = t.name + ' (Copy)';
+            document.getElementById('subA').value = t.subject;
+            const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+            if (quill) quill.clipboard.dangerouslyPasteHTML(t.body);
+        }
+    };
+
+    window.refineAI = async function() {
+        const key = document.getElementById('conf-gemini-key')?.value;
+        if (!key) return alert('Gemini API key not configured');
+        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        if (!quill) return;
+        const text = quill.getText();
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: 'Rewrite this for an MSME business owner. Be persuasive, direct, professional:\n' + text }] }] })
+            });
+            const data = await res.json();
+            quill.root.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
+            log('AI refinement applied');
+        } catch(e) {
+            console.error(e);
+            alert('AI refinement failed');
+        }
+    };
+
+    window.insertTag = function(tag) {
+        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        if (quill) {
+            const range = quill.getSelection(true);
+            quill.insertText(range?.index || quill.getLength(), tag);
+        }
+    };
+
+    window.checkSpam = function() {
+        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        if (!quill) return;
+        const text = quill.getText().toLowerCase();
+        const triggers = ['free','guarantee','winner','urgent','$$$','click here','act now','buy now','100%'];
+        const found = triggers.filter(t => text.includes(t));
+        alert(found.length ? '⚠️ Spam triggers: ' + found.join(', ') : '✅ Clean');
+    };
+
+    window.saveSettings = function() {
+        const ids = ['conf-gas-url','conf-master-key','conf-sender-name','conf-reply-addr',
+                     'conf-unsubscribe-url','conf-gemini-key','conf-spam-delay','conf-footer'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) localStorage.setItem('rave_' + id, el.value);
+        });
+        localStorage.setItem('rave_conf-pixel', document.getElementById('conf-pixel')?.checked || false);
+        alert('Settings saved to localStorage');
+    };
+
+    window.log = function(msg) {
+        console.log('[Raveone]', msg);
+    };
+
+    // ---------- Load settings from localStorage ----------
+    window.addEventListener('load', () => {
+        const defaultUrl = 'https://script.google.com/macros/s/AKfycbw-BCKTdVmrxdkMIxa4o7vnojE24Ezd_SDu9ynxNVSxAJnhAibHpWsqUetHHLZU6aeB9A/exec'; // Replace with your deployed URL
+        document.getElementById('conf-gas-url').value = localStorage.getItem('rave_conf-gas-url') || defaultUrl;
+        document.getElementById('conf-master-key').value = localStorage.getItem('rave_conf-master-key') || '';
+        document.getElementById('conf-sender-name').value = localStorage.getItem('rave_conf-sender-name') || 'Raveone Consultants';
+        document.getElementById('conf-reply-addr').value = localStorage.getItem('rave_conf-reply-addr') || 'noreply@raveone.in';
+        document.getElementById('conf-unsubscribe-url').value = localStorage.getItem('rave_conf-unsubscribe-url') || 'https://yourdomain.com/unsubscribe?email=';
+        document.getElementById('conf-gemini-key').value = localStorage.getItem('rave_conf-gemini-key') || '';
+        document.getElementById('conf-spam-delay').value = localStorage.getItem('rave_conf-spam-delay') || '5';
+        document.getElementById('conf-pixel').checked = localStorage.getItem('rave_conf-pixel') !== 'false';
+        document.getElementById('conf-footer').value = localStorage.getItem('rave_conf-footer') || 
+            `<br><hr><div style="font-size:12px; color:#666;">Raveone Consultants · #32, 3rd Main, Nagarbhavi, Bangalore<br>To unsubscribe, <a href="{UNSUBSCRIBE_URL}">click here</a>.</div>`;
+    });
+</script>
+
 </body>
 </html>
