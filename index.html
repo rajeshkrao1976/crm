@@ -316,34 +316,13 @@
 <!-- ========== ALPINE STORE INITIALIZATION ========== -->
 <script>
     document.addEventListener('alpine:init', () => {
+        // ---------- INITIALISE EMPTY STORES – READY FOR REAL DATA ----------
         Alpine.store('auth', { authenticated: false });
-
-        // ---------- Dummy Data – replace with JSONP calls ----------
-        Alpine.store('stats', {
-            total: 2847,
-            quota: 1500,
-            pipelineValue: 1245000
-        });
-
-        Alpine.store('campaigns', [
-            { id: 1, name: 'Training Announcement', subject: 'New batch starting soon', status: 'Running', limit: 500, segment: 'MSME' },
-            { id: 2, name: 'Welcome Series', subject: 'Welcome to Raveone', status: 'Draft', limit: 300, segment: 'New' }
-        ]);
-
-        Alpine.store('deals', [
-            { id: 1, name: 'HireGrow Onboarding', business: 'HireGrow', value: 450000, pipeline: 'Recruitment', stage: 'Discovery', contactEmail: 'client@hiregrow.com' },
-            { id: 2, name: 'Training Module', business: 'MSME Institute', value: 120000, pipeline: 'Training', stage: 'Proposal' }
-        ]);
-
-        Alpine.store('templates', [
-            { id: 1, name: 'Welcome Email', subject: 'Welcome!', category: 'Onboarding', body: '<p>Hi {Name}, welcome to Raveone.</p>' },
-            { id: 2, name: 'Promo', subject: 'Special offer', category: 'Marketing', body: '<p>Check out our new training programs.</p>' }
-        ]);
-
-        Alpine.store('contacts', [
-            { email: 'client@hiregrow.com', name: 'Rajesh Kumar', business: 'HireGrow' },
-            { email: 'contact@msme.in', name: 'Priya Sharma', business: 'MSME Institute' }
-        ]);
+        Alpine.store('stats', { total: 0, quota: 0, pipelineValue: 0 });
+        Alpine.store('campaigns', []);
+        Alpine.store('deals', []);
+        Alpine.store('templates', []);
+        Alpine.store('contacts', []);
     });
 </script>
 
@@ -363,6 +342,8 @@
         <button @click="
             if (token === 'RAVE-ACCESS-2025') {
                 $store.auth.authenticated = true;
+                // 🔥 LOAD REAL DATA IMMEDIATELY AFTER AUTH
+                loadRealData();
             } else {
                 alert('Access denied');
             }
@@ -468,7 +449,7 @@
                 </div>
                 <div class="kpi-item">
                     <div class="kpi-label">Pipeline Value</div>
-                    <div class="kpi-value" x-text="'₹' + $store.stats.pipelineValue.toLocaleString()"></div>
+                    <div class="kpi-value" x-text="'₹' + ($store.stats.pipelineValue || 0).toLocaleString()"></div>
                 </div>
                 <div class="kpi-item">
                     <div class="kpi-label">Daily Quota</div>
@@ -496,10 +477,13 @@
                             <tr>
                                 <td x-text="c.name"></td>
                                 <td x-text="c.subject"></td>
-                                <td><span class="status-pill" :class="c.status.toLowerCase()" x-text="c.status"></span></td>
+                                <td><span class="status-pill" :class="c.status?.toLowerCase()" x-text="c.status || 'Draft'"></span></td>
                                 <td x-text="c.limit"></td>
                             </tr>
                         </template>
+                        <tr x-show="$store.campaigns.length === 0">
+                            <td colspan="4" style="text-align:center; color: var(--text-muted);">No campaigns yet</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -531,7 +515,7 @@
                             <tr>
                                 <td><span style="font-weight:600;" x-text="d.name"></span></td>
                                 <td x-text="d.business"></td>
-                                <td x-text="'₹' + d.value.toLocaleString()"></td>
+                                <td x-text="'₹' + (d.value || 0).toLocaleString()"></td>
                                 <td x-text="d.contactEmail || '—'"></td>
                                 <td>
                                     <select @change="updateDealStage(d.id, $event.target.value)" 
@@ -544,6 +528,9 @@
                                 </td>
                             </tr>
                         </template>
+                        <tr x-show="$store.deals.length === 0">
+                            <td colspan="5" style="text-align:center; color: var(--text-muted);">No deals yet</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -569,7 +556,7 @@
                                 <td x-text="c.subject"></td>
                                 <td x-text="c.segment || 'All'"></td>
                                 <td x-text="c.limit"></td>
-                                <td><span class="status-pill" :class="c.status.toLowerCase()" x-text="c.status"></span></td>
+                                <td><span class="status-pill" :class="c.status?.toLowerCase()" x-text="c.status || 'Draft'"></span></td>
                                 <td>
                                     <button @click="toggleCampaignStatus(c.id)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">
                                         <span x-text="c.status === 'Running' ? 'Stop' : 'Start'"></span>
@@ -577,6 +564,9 @@
                                 </td>
                             </tr>
                         </template>
+                        <tr x-show="$store.campaigns.length === 0">
+                            <td colspan="6" style="text-align:center; color: var(--text-muted);">No campaigns yet</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -690,6 +680,9 @@
                                     <span x-text="t.name"></span>
                                 </button>
                             </template>
+                            <div x-show="$store.templates.length === 0" style="padding:0.5rem; color: var(--text-muted);">
+                                No templates saved
+                            </div>
                         </div>
                     </div>
                     <button @click="refineAI()" class="btn btn-primary" style="background: linear-gradient(135deg,#6366f1,#a855f7);">
@@ -821,6 +814,30 @@
         return response;
     }
 
+    // ---------- GLOBAL DATA LOADER – FETCHES REAL BACKEND DATA ----------
+    window.loadRealData = async function() {
+        try {
+            log('Loading real data from backend...');
+            const [stats, campaigns, deals, contacts, templates] = await Promise.all([
+                apiCall('getStatus').catch(() => ({ total: 0, quota: 0, pipelineValue: 0 })),
+                apiCall('getCampaigns').catch(() => []),
+                apiCall('getDeals').catch(() => []),
+                apiCall('getContacts').catch(() => []),
+                apiCall('getTemplates').catch(() => [])
+            ]);
+
+            Alpine.store('stats', stats);
+            Alpine.store('campaigns', Array.isArray(campaigns) ? campaigns : []);
+            Alpine.store('deals', Array.isArray(deals) ? deals : []);
+            Alpine.store('contacts', Array.isArray(contacts) ? contacts : []);
+            Alpine.store('templates', Array.isArray(templates) ? templates : []);
+
+            log(`Data loaded: ${stats.total} contacts, ${deals.length} deals, ${campaigns.length} campaigns`);
+        } catch (e) {
+            log('Failed to load data: ' + e.message);
+        }
+    };
+
     // ---------- Global functions for Alpine ----------
     window.saveDeal = async function() {
         const newDeal = {
@@ -834,11 +851,13 @@
         };
         try {
             await apiCall('saveDeal', { deal: newDeal });
-            Alpine.store('deals').push(newDeal);
-            log('Deal created (demo)');
+            // Refresh deals list
+            const deals = await apiCall('getDeals');
+            Alpine.store('deals', deals);
+            log('Deal created and synced');
         } catch(e) {
             console.error(e);
-            Alpine.store('deals').push(newDeal);
+            alert('Failed to save deal: ' + e.message);
         }
     };
 
@@ -848,8 +867,8 @@
             const deal = Alpine.store('deals').find(d => d.id == id);
             if (deal) deal.stage = stage;
         } catch(e) {
-            const deal = Alpine.store('deals').find(d => d.id == id);
-            if (deal) deal.stage = stage;
+            console.error(e);
+            alert('Failed to update stage: ' + e.message);
         }
     };
 
@@ -860,32 +879,35 @@
             await apiCall('toggleCampaignStatus', { id, status: newStatus });
             if (campaign) campaign.status = newStatus;
         } catch(e) {
-            if (campaign) campaign.status = newStatus;
+            console.error(e);
+            alert('Failed to toggle status: ' + e.message);
         }
     };
 
     window.saveCampaign = async function() {
         const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
-        const body = quillEl?.root?.innerHTML || '<p>Sample content</p>';
+        const body = quillEl?.root?.innerHTML || '';
         const signature = document.getElementById('conf-footer')?.value || '';
         const unsubscribeBase = document.getElementById('conf-unsubscribe-url')?.value || '';
         const finalBody = body + signature.replace(/{UNSUBSCRIBE_URL}/g, unsubscribeBase + '{EMAIL}');
         
         const newCampaign = {
-            id: Date.now(),
             name: document.getElementById('campName')?.value || 'New Campaign',
             subject: document.getElementById('subA')?.value || 'No subject',
             body: finalBody,
             limit: document.getElementById('campLimit')?.value || 300,
-            segment: document.getElementById('campSegment')?.value || '',
-            status: 'Draft'
+            segment: document.getElementById('campSegment')?.value || ''
         };
         try {
             await apiCall('saveCampaign', { campaign: newCampaign });
-            Alpine.store('campaigns').push(newCampaign);
-            log('Campaign saved (demo)');
+            log('Campaign saved');
+            // Refresh campaigns list
+            const campaigns = await apiCall('getCampaigns');
+            Alpine.store('campaigns', campaigns);
+            Alpine.store('alpine').activeNav = 'campaigns';
         } catch(e) {
-            Alpine.store('campaigns').push(newCampaign);
+            console.error(e);
+            alert('Failed to save campaign: ' + e.message);
         }
     };
 
@@ -896,19 +918,15 @@
         const subject = document.getElementById('subA')?.value || '';
         const body = quillEl?.root?.innerHTML || '';
         const category = prompt('Category:') || 'General';
-        const newTemplate = {
-            id: Date.now(),
-            name,
-            subject,
-            body,
-            category
-        };
         try {
-            await apiCall('saveTemplate', { template: newTemplate });
-            Alpine.store('templates').push(newTemplate);
+            await apiCall('saveTemplate', { template: { name, subject, body, category } });
             log('Template saved');
+            // Refresh templates list
+            const templates = await apiCall('getTemplates');
+            Alpine.store('templates', templates);
         } catch(e) {
-            Alpine.store('templates').push(newTemplate);
+            console.error(e);
+            alert('Failed to save template: ' + e.message);
         }
     };
 
@@ -918,7 +936,8 @@
             await apiCall('deleteTemplate', { id });
             Alpine.store('templates', Alpine.store('templates').filter(t => t.id != id));
         } catch(e) {
-            Alpine.store('templates', Alpine.store('templates').filter(t => t.id != id));
+            console.error(e);
+            alert('Failed to delete template: ' + e.message);
         }
     };
 
@@ -949,7 +968,7 @@
             log('AI refinement applied');
         } catch(e) {
             console.error(e);
-            alert('AI refinement failed');
+            alert('AI refinement failed: ' + e.message);
         }
     };
 
@@ -983,6 +1002,8 @@
 
     window.log = function(msg) {
         console.log('[Raveone]', msg);
+        const logsEl = document.getElementById('logs');
+        if (logsEl) logsEl.innerHTML = `> ${new Date().toLocaleTimeString()}: ${msg}<br>` + logsEl.innerHTML;
     };
 
     // ---------- Load settings from localStorage ----------
@@ -1000,6 +1021,9 @@
             `<br><hr><div style="font-size:12px; color:#666;">Raveone Consultants · #32, 3rd Main, Nagarbhavi, Bangalore<br>To unsubscribe, <a href="{UNSUBSCRIBE_URL}">click here</a>.</div>`;
     });
 </script>
+
+<!-- Optional: logs container (add to dashboard later if desired) -->
+<div id="logs" style="display: none;"></div>
 
 </body>
 </html>
