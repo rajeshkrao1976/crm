@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raveone Emailer · ERPNext‑Style Desk</title>
+    <title>Raveone · ERPNext‑Style Desk</title>
 
     <!-- Oat UI – ultra‑light, semantic, zero dependencies -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/oat-ui@latest/dist/oat.min.css">
@@ -318,7 +318,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.store('auth', { authenticated: false });
 
-        // ---------- Dummy Data – replace with your JSONP calls ----------
+        // ---------- Dummy Data – replace with JSONP calls ----------
         Alpine.store('stats', {
             total: 2847,
             quota: 1500,
@@ -383,7 +383,6 @@
      x-cloak
      class="erp-desk"
      x-init="
-        // Initialize Quill when wizard page becomes active
         $watch('activeNav', value => {
             if (value === 'wizard' && !quill) {
                 setTimeout(() => {
@@ -839,7 +838,6 @@
             log('Deal created (demo)');
         } catch(e) {
             console.error(e);
-            // Fallback: update local store anyway for demo
             Alpine.store('deals').push(newDeal);
         }
     };
@@ -850,7 +848,6 @@
             const deal = Alpine.store('deals').find(d => d.id == id);
             if (deal) deal.stage = stage;
         } catch(e) {
-            // Fallback for demo
             const deal = Alpine.store('deals').find(d => d.id == id);
             if (deal) deal.stage = stage;
         }
@@ -868,7 +865,8 @@
     };
 
     window.saveCampaign = async function() {
-        const body = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill?.root?.innerHTML || '<p>Sample content</p>';
+        const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        const body = quillEl?.root?.innerHTML || '<p>Sample content</p>';
         const signature = document.getElementById('conf-footer')?.value || '';
         const unsubscribeBase = document.getElementById('conf-unsubscribe-url')?.value || '';
         const finalBody = body + signature.replace(/{UNSUBSCRIBE_URL}/g, unsubscribeBase + '{EMAIL}');
@@ -894,9 +892,9 @@
     window.saveCurrentAsTemplate = async function() {
         const name = prompt('Template name:');
         if (!name) return;
-        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
         const subject = document.getElementById('subA')?.value || '';
-        const body = quill?.root?.innerHTML || '';
+        const body = quillEl?.root?.innerHTML || '';
         const category = prompt('Category:') || 'General';
         const newTemplate = {
             id: Date.now(),
@@ -929,17 +927,17 @@
         if (t) {
             document.getElementById('campName').value = t.name + ' (Copy)';
             document.getElementById('subA').value = t.subject;
-            const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
-            if (quill) quill.clipboard.dangerouslyPasteHTML(t.body);
+            const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+            if (quillEl) quillEl.clipboard.dangerouslyPasteHTML(t.body);
         }
     };
 
     window.refineAI = async function() {
         const key = document.getElementById('conf-gemini-key')?.value;
         if (!key) return alert('Gemini API key not configured');
-        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
-        if (!quill) return;
-        const text = quill.getText();
+        const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        if (!quillEl) return;
+        const text = quillEl.getText();
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
                 method: 'POST',
@@ -947,7 +945,7 @@
                 body: JSON.stringify({ contents: [{ parts: [{ text: 'Rewrite this for an MSME business owner. Be persuasive, direct, professional:\n' + text }] }] })
             });
             const data = await res.json();
-            quill.root.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
+            quillEl.root.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
             log('AI refinement applied');
         } catch(e) {
             console.error(e);
@@ -956,17 +954,17 @@
     };
 
     window.insertTag = function(tag) {
-        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
-        if (quill) {
-            const range = quill.getSelection(true);
-            quill.insertText(range?.index || quill.getLength(), tag);
+        const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        if (quillEl) {
+            const range = quillEl.getSelection(true);
+            quillEl.insertText(range?.index || quillEl.getLength(), tag);
         }
     };
 
     window.checkSpam = function() {
-        const quill = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
-        if (!quill) return;
-        const text = quill.getText().toLowerCase();
+        const quillEl = Alpine.$data(document.querySelector('[x-data*="quill"]'))?.quill;
+        if (!quillEl) return;
+        const text = quillEl.getText().toLowerCase();
         const triggers = ['free','guarantee','winner','urgent','$$$','click here','act now','buy now','100%'];
         const found = triggers.filter(t => text.includes(t));
         alert(found.length ? '⚠️ Spam triggers: ' + found.join(', ') : '✅ Clean');
@@ -989,7 +987,7 @@
 
     // ---------- Load settings from localStorage ----------
     window.addEventListener('load', () => {
-        const defaultUrl = 'https://script.google.com/macros/s/AKfycbw-BCKTdVmrxdkMIxa4o7vnojE24Ezd_SDu9ynxNVSxAJnhAibHpWsqUetHHLZU6aeB9A/exec'; // Replace with your deployed URL
+        const defaultUrl = 'https://script.google.com/macros/s/AKfycbw-BCKTdVmrxdkMIxa4o7vnojE24Ezd_SDu9ynxNVSxAJnhAibHpWsqUetHHLZU6aeB9A/exec'; // 🔁 REPLACE WITH YOUR DEPLOYED URL
         document.getElementById('conf-gas-url').value = localStorage.getItem('rave_conf-gas-url') || defaultUrl;
         document.getElementById('conf-master-key').value = localStorage.getItem('rave_conf-master-key') || '';
         document.getElementById('conf-sender-name').value = localStorage.getItem('rave_conf-sender-name') || 'Raveone Consultants';
