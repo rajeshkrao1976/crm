@@ -437,7 +437,7 @@
             
             document.getElementById('crm-pipeline-tabs').classList.toggle('hidden', id !== 'crm');
             if(id === 'crm') renderCRM();
-            if(id === 'contacts') renderContacts();
+            if(id === 'contacts') { renderContacts(); fetchContacts(); }
             if(id === 'campaigns') fetchCampaigns();
             if(id === 'templates') renderTemplates();
             if(id === 'dashboard') fetchStats();
@@ -574,14 +574,57 @@
             document.getElementById('statContacts').innerText = contacts.length;
         }
 
-        function saveLead() {
-            contacts.push({
-                name: document.getElementById('lName').value,
-                email: document.getElementById('lEmail').value,
-                business: document.getElementById('lBusiness').value,
-                tag: document.getElementById('lTags').value || 'New'
-            });
-            closeModal('leadModal'); renderContacts(); log("New contact added.");
+        async function fetchContacts() {
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            if(!url || !key) return;
+
+            try {
+                const res = await fetch(`${url}?action=getContacts&key=${key}`);
+                const data = await res.json();
+                if(Array.isArray(data)) {
+                    contacts = data;
+                    renderContacts();
+                    log(`Synced ${contacts.length} contacts from database.`);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function saveLead() {
+            const name = document.getElementById('lName').value;
+            const email = document.getElementById('lEmail').value;
+            const business = document.getElementById('lBusiness').value;
+            const tag = document.getElementById('lTags').value || 'New';
+
+            const newContact = { name, email, business, tag };
+            
+            // 1. Optimistic UI Update
+            contacts.push(newContact);
+            closeModal('leadModal'); 
+            renderContacts(); 
+            
+            // 2. Send to Backend
+            const url = document.getElementById('conf-gas-url').value;
+            const key = document.getElementById('conf-master-key').value;
+            
+            if(url && key) {
+                log("Saving contact to database...");
+                try {
+                    await fetch(url, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'saveContact',
+                            key: key,
+                            contact: newContact
+                        })
+                    });
+                    log("Contact saved to Cloud.");
+                } catch(e) {
+                    log("Error saving to Cloud (Offline mode).");
+                }
+            } else {
+                log("Contact saved locally (No backend configured).");
+            }
         }
 
         // MAILING WIZARD
