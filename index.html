@@ -643,7 +643,10 @@
         }
 
         window.onload = () => {
-            document.getElementById('conf-gas-url').value = localStorage.getItem('rave_gas_url') || "";
+            // PRE-FILLED URL PROVIDED BY USER
+            const hardcodedUrl = "https://script.google.com/macros/s/AKfycbxhveRxtbA2jIPLXRYXwBI1zGF3CQ9fcBcj7_1s0he72O3CuPg1r45IpxYldpCVxIJVWQ/exec";
+            
+            document.getElementById('conf-gas-url').value = localStorage.getItem('rave_gas_url') || hardcodedUrl;
             document.getElementById('conf-master-key').value = localStorage.getItem('rave_master_key') || "";
             document.getElementById('conf-gemini-key').value = localStorage.getItem('rave_gemini_key') || "";
             // Load New Configs
