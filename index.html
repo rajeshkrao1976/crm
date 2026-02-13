@@ -3,78 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raveone · ERPNext‑Style Desk</title>
+    <title>Raveone · Odoo‑Style Desk</title>
 
-    <!-- Oat UI – ultra‑light, semantic, zero dependencies -->
+    <!-- Oat UI – base styles (we'll override for rectangular look) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/oat-ui@latest/dist/oat.min.css">
-
-    <!-- Alpine.js – reactive, declarative -->
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- Font Awesome 6 – ERPNext‑style icons -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <!-- Google Font: Inter – modern, clean -->
+    <!-- Google Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Quill.js – rich text editor -->
+    <!-- Quill.js -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <style>
-        /* ---------- ERPNext / Frappe Design System (V13/V15 Espresso) ---------- */
-        :root {
-            --brand-blue: #2563eb;
-            --brand-blue-dark: #1e40af;
-            --brand-blue-light: #dbeafe;
-            --bg-page: #f9fafb;
-            --bg-card: #ffffff;
-            --bg-sidebar: #ffffff;
-            --bg-sidebar-hover: #f3f4f6;
-            --bg-active: #eff6ff;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --border-light: #f0f0f0;
-            --shadow-card: 0 2px 6px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
-            --shadow-hover: 0 8px 20px rgba(0,0,0,0.04);
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-page: #111827;
-                --bg-card: #1f2937;
-                --bg-sidebar: #1f2937;
-                --bg-sidebar-hover: #374151;
-                --bg-active: #2563eb20;
-                --text-primary: #f9fafb;
-                --text-secondary: #d1d5db;
-                --text-muted: #9ca3af;
-                --border-light: #374151;
-                --shadow-card: 0 4px 12px rgba(0,0,0,0.2);
-            }
-        }
-
+        /* ----- Odoo‑Style Rectangular Design (Simplistic, Clean) ----- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: var(--font-sans);
-            background: var(--bg-page);
-            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f7fb;
+            color: #333;
             line-height: 1.5;
         }
         [x-cloak] { display: none !important; }
 
-        /* ERPNext Desk Layout */
-        .erp-desk { display: flex; min-height: 100vh; }
+        /* Layout */
+        .odoo-layout { display: flex; min-height: 100vh; }
 
-        /* ---------- Left Sidebar (Persistent) ---------- */
+        /* Sidebar – dark, rectangular, no rounded corners */
         .sidebar {
             width: 260px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border-light);
+            background: #1e2b3c;
+            color: #fff;
             display: flex;
             flex-direction: column;
             padding: 1.5rem 0;
@@ -91,12 +52,12 @@
         }
         .sidebar-header i {
             font-size: 1.75rem;
-            color: var(--brand-blue);
+            color: #3b7a9e;
         }
         .sidebar-header h1 {
             font-size: 1.25rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #fff;
         }
         .sidebar-nav {
             flex: 1;
@@ -110,51 +71,35 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.75rem 1rem;
-            border-radius: var(--radius-md);
-            color: var(--text-secondary);
+            color: #ccc;
             font-weight: 500;
-            transition: all 0.1s;
+            transition: background 0.1s;
             cursor: pointer;
             border: none;
             background: transparent;
             width: 100%;
             text-align: left;
+            border-radius: 0; /* rectangular */
         }
-        .nav-item i {
-            width: 1.5rem;
-            color: var(--text-muted);
-        }
-        .nav-item:hover {
-            background: var(--bg-sidebar-hover);
-            color: var(--text-primary);
-        }
-        .nav-item.active {
-            background: var(--bg-active);
-            color: var(--brand-blue);
-            font-weight: 600;
-        }
-        .nav-item.active i {
-            color: var(--brand-blue);
-        }
+        .nav-item i { width: 1.5rem; color: #aaa; }
+        .nav-item:hover { background: #2c3e50; color: #fff; }
+        .nav-item.active { background: #3b7a9e; color: #fff; }
+        .nav-item.active i { color: #fff; }
 
-        /* ---------- Main Content Area ---------- */
+        /* Main content – rectangular cards, no rounding */
         .main-content {
             flex: 1;
             padding: 2rem;
-            background: var(--bg-page);
+            background: #f5f7fb;
             overflow-y: auto;
         }
 
-        /* ERPNext‑style cards */
-        .frappe-card {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
+        /* Cards – rectangular, subtle border, no shadow */
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
             padding: 1.5rem;
-            box-shadow: var(--shadow-card);
-            transition: box-shadow 0.2s;
-        }
-        .frappe-card:hover {
-            box-shadow: var(--shadow-hover);
+            margin-bottom: 1.5rem;
         }
 
         /* KPI grid */
@@ -165,25 +110,24 @@
             margin-bottom: 2rem;
         }
         .kpi-item {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
+            background: #fff;
+            border: 1px solid #e2e8f0;
             padding: 1.5rem;
-            box-shadow: var(--shadow-card);
         }
         .kpi-label {
             font-size: 0.75rem;
             text-transform: uppercase;
-            color: var(--text-secondary);
+            color: #6b7280;
             margin-bottom: 0.5rem;
         }
         .kpi-value {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #111827;
             line-height: 1.2;
         }
 
-        /* ERPNext 3‑column form */
+        /* Form elements – rectangular, simple */
         .form-grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -197,86 +141,81 @@
         .form-group label {
             font-size: 0.75rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #6b7280;
             text-transform: uppercase;
         }
         input, select, textarea {
             width: 100%;
             padding: 0.6rem 0.75rem;
-            border: 1px solid var(--border-light);
-            border-radius: 0.375rem;
-            background: var(--bg-card);
-            color: var(--text-primary);
-            font-family: var(--font-sans);
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-family: 'Inter', sans-serif;
+            border-radius: 0; /* rectangular */
         }
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: var(--brand-blue);
-            box-shadow: 0 0 0 3px var(--brand-blue-light);
+            border-color: #3b7a9e;
         }
 
-        /* Buttons */
+        /* Buttons – rectangular, clean */
         .btn {
             padding: 0.6rem 1.25rem;
-            border-radius: 0.375rem;
             font-weight: 500;
             border: none;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            border-radius: 0;
         }
         .btn-primary {
-            background: var(--brand-blue);
-            color: white;
+            background: #3b7a9e;
+            color: #fff;
         }
         .btn-primary:hover {
-            background: var(--brand-blue-dark);
+            background: #2c5f7a;
         }
         .btn-secondary {
-            background: var(--bg-sidebar-hover);
-            color: var(--text-primary);
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
         }
 
         /* Tables */
-        .frappe-table {
+        .table {
             width: 100%;
             border-collapse: collapse;
         }
-        .frappe-table th {
+        .table th {
             text-align: left;
             padding: 0.75rem 1rem;
             font-size: 0.75rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #6b7280;
             text-transform: uppercase;
-            border-bottom: 1px solid var(--border-light);
+            border-bottom: 1px solid #e2e8f0;
         }
-        .frappe-table td {
+        .table td {
             padding: 1rem;
-            border-bottom: 1px solid var(--border-light);
-            color: var(--text-primary);
+            border-bottom: 1px solid #e2e8f0;
         }
-        .frappe-table tbody tr:hover {
-            background: var(--bg-sidebar-hover);
+        .table tbody tr:hover {
+            background: #f8fafc;
         }
 
-        /* Status pills */
+        /* Status pills – rectangular, no rounding */
         .status-pill {
             display: inline-block;
             padding: 0.2rem 0.75rem;
-            border-radius: 2rem;
             font-size: 0.75rem;
             font-weight: 600;
         }
         .status-pill.running { background: #dcfce7; color: #166534; }
-        .status-pill.draft { background: #f3f4f6; color: #4b5563; }
-        @media (prefers-color-scheme: dark) {
-            .status-pill.running { background: #14532d; color: #bbf7d0; }
-            .status-pill.draft { background: #374151; color: #e5e7eb; }
-        }
+        .status-pill.draft { background: #f1f5f9; color: #334155; }
 
-        /* Modal overlay */
+        /* Modal overlay – rectangular */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -287,36 +226,19 @@
             z-index: 1000;
         }
         .modal-content {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
+            background: #fff;
+            border: 1px solid #e2e8f0;
             padding: 2rem;
             width: 480px;
             max-width: 90%;
-        }
-
-        /* Quill editor customization */
-        .ql-editor {
-            min-height: 300px;
-            font-family: var(--font-sans);
-        }
-        .ql-toolbar {
-            border-top-left-radius: 0.5rem;
-            border-top-right-radius: 0.5rem;
-            border-color: var(--border-light) !important;
-        }
-        .ql-container {
-            border-bottom-left-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
-            border-color: var(--border-light) !important;
         }
     </style>
 </head>
 <body>
 
-<!-- ========== ALPINE STORE INITIALIZATION ========== -->
+<!-- Alpine store -->
 <script>
     document.addEventListener('alpine:init', () => {
-        // ---------- INITIALISE EMPTY STORES – READY FOR REAL DATA ----------
         Alpine.store('auth', { authenticated: false });
         Alpine.store('stats', { total: 0, quota: 0, pipelineValue: 0 });
         Alpine.store('campaigns', []);
@@ -326,23 +248,22 @@
     });
 </script>
 
-<!-- ========== AUTH OVERLAY ========== -->
+<!-- Auth overlay -->
 <div x-data="{ token: '' }" 
      x-show="!$store.auth.authenticated" 
      x-cloak
-     class="modal-overlay" style="background: rgba(17,24,39,0.95); backdrop-filter: blur(4px);">
+     class="modal-overlay">
     <div class="modal-content" style="width: 400px;">
         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-            <i class="fas fa-cube" style="font-size: 2rem; color: var(--brand-blue);"></i>
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin:0;">Raveone</h2>
+            <i class="fas fa-cube" style="font-size: 2rem; color: #3b7a9e;"></i>
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin:0;">Raveone</h2>
         </div>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Enter your access token to continue.</p>
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">Enter your access token to continue.</p>
         <input type="password" x-model="token" placeholder="Access token" 
-               style="width:100%; padding:0.75rem 1rem; border:1px solid var(--border-light); border-radius:0.5rem; margin-bottom:1.5rem; background: var(--bg-card); color: var(--text-primary);">
+               style="width:100%; padding:0.75rem 1rem; border:1px solid #e2e8f0; margin-bottom:1.5rem;">
         <button @click="
             if (token === 'RAVE-ACCESS-2025') {
                 $store.auth.authenticated = true;
-                // 🔥 LOAD REAL DATA IMMEDIATELY AFTER AUTH
                 loadRealData();
             } else {
                 alert('Access denied');
@@ -353,16 +274,18 @@
     </div>
 </div>
 
-<!-- ========== MAIN DESK – ERPNext LAYOUT ========== -->
+<!-- Main layout -->
 <div x-data="{ 
         activeNav: 'dashboard',
         showDealModal: false,
         showTemplateMenu: false,
-        quill: null
+        quill: null,
+        isValidating: false,
+        isCleaning: false
      }" 
      x-show="$store.auth.authenticated" 
      x-cloak
-     class="erp-desk"
+     class="odoo-layout"
      x-init="
         $watch('activeNav', value => {
             if (value === 'wizard' && !quill) {
@@ -382,7 +305,7 @@
         });
      ">
 
-    <!-- ========== SIDEBAR NAVIGATION ========== -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-cube"></i>
@@ -426,21 +349,21 @@
                 <span>Composer</span>
             </button>
         </div>
-        <div style="padding: 1.5rem 1.5rem 0; border-top: 1px solid var(--border-light); margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+        <div style="padding: 1.5rem 1.5rem 0; border-top: 1px solid #2c3e50; margin-top: 1.5rem; color: #aaa; font-size: 0.85rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <i class="fas fa-cloud"></i>
                 <span x-text="$store.stats.quota + ' / 1500 daily'"></span>
             </div>
-            <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+            <div style="margin-top: 0.5rem;">
                 <span x-text="$store.stats.total + ' contacts'"></span>
             </div>
         </div>
     </div>
 
-    <!-- ========== MAIN CONTENT AREA ========== -->
+    <!-- Main content -->
     <div class="main-content">
 
-        <!-- ===== DASHBOARD PAGE ===== -->
+        <!-- Dashboard -->
         <div x-show="activeNav === 'dashboard'">
             <div class="kpi-grid">
                 <div class="kpi-item">
@@ -461,14 +384,14 @@
                 </div>
             </div>
 
-            <div class="frappe-card">
+            <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h3 style="font-size: 1.1rem; font-weight: 600;">📬 Recent Mailings</h3>
                     <button @click="activeNav = 'campaigns'" class="btn btn-primary">
                         <i class="fas fa-plus"></i> New Campaign
                     </button>
                 </div>
-                <table class="frappe-table">
+                <table class="table">
                     <thead>
                         <tr><th>Name</th><th>Subject</th><th>Status</th><th>Limit</th></tr>
                     </thead>
@@ -482,14 +405,14 @@
                             </tr>
                         </template>
                         <tr x-show="$store.campaigns.length === 0">
-                            <td colspan="4" style="text-align:center; color: var(--text-muted);">No campaigns yet</td>
+                            <td colspan="4" style="text-align:center; color: #aaa;">No campaigns yet</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== CRM PAGE ===== -->
+        <!-- CRM -->
         <div x-show="activeNav === 'crm'">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 style="font-size: 1.25rem; font-weight: 600;">Deal Pipeline</h2>
@@ -497,16 +420,13 @@
                     <i class="fas fa-plus"></i> New Opportunity
                 </button>
             </div>
-
-            <!-- Pipeline tabs (static for now) -->
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
                 <button class="btn btn-secondary">Recruitment</button>
                 <button class="btn btn-secondary">Training</button>
                 <button class="btn btn-secondary">Consulting</button>
             </div>
-
-            <div class="frappe-card">
-                <table class="frappe-table">
+            <div class="card">
+                <table class="table">
                     <thead>
                         <tr><th>Opportunity</th><th>Company</th><th>Value</th><th>Contact</th><th>Stage</th></tr>
                     </thead>
@@ -519,7 +439,7 @@
                                 <td x-text="d.contactEmail || '—'"></td>
                                 <td>
                                     <select @change="updateDealStage(d.id, $event.target.value)" 
-                                            style="background: var(--bg-sidebar-hover); border: none; padding: 0.25rem 0.75rem; border-radius: 2rem;">
+                                            style="background: #f1f5f9; border: none; padding: 0.25rem 0.75rem;">
                                         <option value="New" :selected="d.stage === 'New'">New</option>
                                         <option value="Discovery" :selected="d.stage === 'Discovery'">Discovery</option>
                                         <option value="Proposal" :selected="d.stage === 'Proposal'">Proposal</option>
@@ -529,14 +449,14 @@
                             </tr>
                         </template>
                         <tr x-show="$store.deals.length === 0">
-                            <td colspan="5" style="text-align:center; color: var(--text-muted);">No deals yet</td>
+                            <td colspan="5" style="text-align:center; color: #aaa;">No deals yet</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== CAMPAIGNS PAGE ===== -->
+        <!-- Campaigns -->
         <div x-show="activeNav === 'campaigns'">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 style="font-size: 1.25rem; font-weight: 600;">Email Campaigns</h2>
@@ -544,8 +464,8 @@
                     <i class="fas fa-paper-plane"></i> Create New
                 </button>
             </div>
-            <div class="frappe-card">
-                <table class="frappe-table">
+            <div class="card">
+                <table class="table">
                     <thead>
                         <tr><th>Name</th><th>Subject</th><th>Segment</th><th>Limit</th><th>Status</th><th></th></tr>
                     </thead>
@@ -565,14 +485,14 @@
                             </tr>
                         </template>
                         <tr x-show="$store.campaigns.length === 0">
-                            <td colspan="6" style="text-align:center; color: var(--text-muted);">No campaigns yet</td>
+                            <td colspan="6" style="text-align:center; color: #aaa;">No campaigns yet</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== TEMPLATES PAGE ===== -->
+        <!-- Templates -->
         <div x-show="activeNav === 'templates'">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 style="font-size: 1.25rem; font-weight: 600;">Template Library</h2>
@@ -580,8 +500,8 @@
                     <i class="fas fa-save"></i> Save Current
                 </button>
             </div>
-            <div class="frappe-card">
-                <table class="frappe-table">
+            <div class="card">
+                <table class="table">
                     <thead>
                         <tr><th>Name</th><th>Subject</th><th>Category</th><th></th></tr>
                     </thead>
@@ -592,27 +512,23 @@
                                 <td x-text="t.subject"></td>
                                 <td x-text="t.category || 'General'"></td>
                                 <td>
-                                    <button @click="useTemplate(t.id); activeNav = 'wizard'" class="btn btn-secondary" style="padding:0.25rem 0.75rem; margin-right:0.5rem;">
-                                        Use
-                                    </button>
-                                    <button @click="deleteTemplate(t.id)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">
-                                        Delete
-                                    </button>
+                                    <button @click="useTemplate(t.id); activeNav = 'wizard'" class="btn btn-secondary" style="padding:0.25rem 0.75rem; margin-right:0.5rem;">Use</button>
+                                    <button @click="deleteTemplate(t.id)" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">Delete</button>
                                 </td>
                             </tr>
                         </template>
                         <tr x-show="$store.templates.length === 0">
-                            <td colspan="4" style="text-align:center; color: var(--text-muted);">No templates yet.</td>
+                            <td colspan="4" style="text-align:center; color: #aaa;">No templates yet</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== SETTINGS PAGE (ERPNext 3‑column form) ===== -->
+        <!-- Settings (with Hygiene Buttons) -->
         <div x-show="activeNav === 'settings'">
             <h2 style="font-size:1.25rem; font-weight:600; margin-bottom:1.5rem;">Configuration</h2>
-            <div class="frappe-card">
+            <div class="card">
                 <div class="form-grid-3">
                     <div class="form-group">
                         <label>Apps Script URL</label>
@@ -655,82 +571,98 @@
                 <div style="margin-top: 2rem;">
                     <label>HTML Signature / Footer</label>
                     <textarea id="conf-footer" rows="6" placeholder="<br><hr><div>... {UNSUBSCRIBE_URL} ...</div>"></textarea>
-                    <p style="font-size:0.75rem; color: var(--text-muted); margin-top:0.5rem;">Use {UNSUBSCRIBE_URL} placeholder. Saved to localStorage.</p>
+                    <p style="font-size:0.75rem; color: #aaa; margin-top:0.5rem;">Use {UNSUBSCRIBE_URL} placeholder. Saved to localStorage.</p>
                 </div>
+
+                <!-- Hygiene Buttons -->
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+                    <h3 style="font-size:1rem; font-weight:600; margin-bottom:1rem;">📋 Contact Hygiene</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button @click="runValidation()" 
+                                :disabled="isValidating"
+                                class="btn btn-primary"
+                                style="min-width: 180px;">
+                            <i class="fas fa-shield-alt"></i>
+                            <span x-show="!isValidating">Run DNS Validation</span>
+                            <span x-show="isValidating"><i class="fas fa-spinner fa-spin"></i> Validating...</span>
+                        </button>
+                        <button @click="runBounceClean()" 
+                                :disabled="isCleaning"
+                                class="btn btn-secondary"
+                                style="min-width: 180px;">
+                            <i class="fas fa-broom"></i>
+                            <span x-show="!isCleaning">Clean Bounces</span>
+                            <span x-show="isCleaning"><i class="fas fa-spinner fa-spin"></i> Cleaning...</span>
+                        </button>
+                    </div>
+                    <p style="font-size:0.75rem; color: #aaa; margin-top:0.75rem;">
+                        DNS validation checks syntax & MX records, updates "Email Valid" column.<br>
+                        Clean Bounces marks all contacts with "Email Valid = FALSE" as Bounced.
+                    </p>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
                     <button @click="saveSettings()" class="btn btn-primary">Save All Settings</button>
                 </div>
             </div>
         </div>
 
-        <!-- ===== WIZARD PAGE (Email Composer) ===== -->
+        <!-- Wizard -->
         <div x-show="activeNav === 'wizard'">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 style="font-size:1.25rem; font-weight:600;">Compose New Mailing</h2>
                 <div style="display: flex; gap: 0.75rem;">
-                    <!-- Template dropdown -->
                     <div style="position: relative;">
                         <button @click="showTemplateMenu = !showTemplateMenu" class="btn btn-secondary">
                             <i class="fas fa-folder-open"></i> Load Template
                         </button>
                         <div x-show="showTemplateMenu" @click.away="showTemplateMenu = false" 
-                             style="position: absolute; right: 0; top: 100%; width: 280px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 0.5rem; padding: 0.5rem; margin-top: 0.25rem; z-index: 50;">
+                             style="position: absolute; right: 0; top: 100%; width: 280px; background: #fff; border: 1px solid #e2e8f0; padding: 0.5rem; margin-top: 0.25rem; z-index: 50;">
                             <template x-for="t in $store.templates" :key="t.id">
-                                <button @click="useTemplate(t.id); showTemplateMenu = false" style="display: block; width:100%; text-align: left; padding: 0.5rem; border-radius:0.375rem;" class="btn btn-secondary">
+                                <button @click="useTemplate(t.id); showTemplateMenu = false" style="display: block; width:100%; text-align: left; padding: 0.5rem; background: none; border: none;" class="btn-secondary">
                                     <span x-text="t.name"></span>
                                 </button>
                             </template>
-                            <div x-show="$store.templates.length === 0" style="padding:0.5rem; color: var(--text-muted);">
-                                No templates saved
-                            </div>
+                            <div x-show="$store.templates.length === 0" style="padding:0.5rem; color: #aaa;">No templates saved</div>
                         </div>
                     </div>
-                    <button @click="refineAI()" class="btn btn-primary" style="background: linear-gradient(135deg,#6366f1,#a855f7);">
-                        ✨ AI Refine
-                    </button>
+                    <button @click="refineAI()" class="btn btn-primary" style="background: linear-gradient(135deg,#6366f1,#a855f7);">✨ AI Refine</button>
                 </div>
             </div>
 
-            <div class="frappe-card" style="padding: 2rem;">
-                <!-- Campaign metadata -->
+            <div class="card" style="padding: 2rem;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
                     <div>
                         <input type="text" id="campName" placeholder="Campaign name" 
-                               style="font-size: 1.5rem; font-weight: 600; border: none; border-bottom: 2px solid var(--border-light); width:100%; padding: 0.25rem 0;">
-                        <input type="text" id="subA" placeholder="Email subject" 
-                               style="margin-top: 1rem; width:100%;">
+                               style="font-size: 1.5rem; font-weight: 600; border: none; border-bottom: 2px solid #e2e8f0; width:100%; padding: 0.25rem 0;">
+                        <input type="text" id="subA" placeholder="Email subject" style="margin-top: 1rem; width:100%;">
                     </div>
-                    <div style="background: var(--bg-sidebar-hover); padding: 1.5rem; border-radius: 1rem;">
+                    <div style="background: #f8fafc; padding: 1.5rem;">
                         <div style="display: flex; gap: 1rem;">
                             <div style="flex:1;">
-                                <label style="font-size:0.75rem; color: var(--text-secondary);">DAILY LIMIT</label>
+                                <label style="font-size:0.75rem; color: #6b7280;">DAILY LIMIT</label>
                                 <input type="number" id="campLimit" value="300" style="width:100%;">
                             </div>
                             <div style="flex:1;">
-                                <label style="font-size:0.75rem; color: var(--text-secondary);">SEGMENT (tag)</label>
+                                <label style="font-size:0.75rem; color: #6b7280;">SEGMENT (tag)</label>
                                 <input type="text" id="campSegment" placeholder="e.g. MSME" style="width:100%;">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Editor toolbar -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 0.5rem;">
-                        <span style="font-size:0.75rem; color: var(--text-secondary);">Variables:</span>
+                        <span style="font-size:0.75rem; color: #6b7280;">Variables:</span>
                         <button @click="insertTag('{Name}')" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">+ Name</button>
                         <button @click="insertTag('{Business}')" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">+ Business</button>
                         <button @click="insertTag('{City}')" class="btn btn-secondary" style="padding:0.25rem 0.75rem;">+ City</button>
                     </div>
-                    <button @click="checkSpam()" class="btn btn-secondary" style="color:#b45309;">
-                        ⚠️ Check Spam
-                    </button>
+                    <button @click="checkSpam()" class="btn btn-secondary" style="color:#b45309;">⚠️ Check Spam</button>
                 </div>
 
-                <!-- Quill editor container -->
                 <div id="editor" style="height: 320px;"></div>
 
-                <!-- Action buttons -->
                 <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
                     <button @click="activeNav = 'campaigns'" class="btn btn-secondary">Cancel</button>
                     <button @click="saveCampaign()" class="btn btn-primary">Save & Sync</button>
@@ -739,7 +671,7 @@
         </div>
     </div>
 
-    <!-- ===== NEW DEAL MODAL (Alpine) ===== -->
+    <!-- New Deal Modal -->
     <div x-show="showDealModal" x-cloak class="modal-overlay" @click.away="showDealModal = false">
         <div class="modal-content">
             <h3 style="margin-top:0; margin-bottom:1.5rem;">Create Opportunity</h3>
@@ -758,7 +690,6 @@
                     <option value="Proposal">Proposal</option>
                     <option value="Won">Won</option>
                 </select>
-                <!-- Contact dropdown -->
                 <select id="dealContactEmail">
                     <option value="">-- Link to contact (optional) --</option>
                     <template x-for="contact in $store.contacts" :key="contact.email">
@@ -774,9 +705,9 @@
     </div>
 </div>
 
-<!-- ========== JSONP & API HELPER FUNCTIONS ========== -->
+<!-- JSONP & API Helpers -->
 <script>
-    // ---------- JSONP – CORS‑free calls to Apps Script ----------
+    // JSONP
     function jsonp(url) {
         return new Promise((resolve, reject) => {
             const cbName = 'jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).substring(2,7);
@@ -814,7 +745,7 @@
         return response;
     }
 
-    // ---------- GLOBAL DATA LOADER – FETCHES REAL BACKEND DATA ----------
+    // Data loader
     window.loadRealData = async function() {
         try {
             log('Loading real data from backend...');
@@ -825,20 +756,53 @@
                 apiCall('getContacts').catch(() => []),
                 apiCall('getTemplates').catch(() => [])
             ]);
-
             Alpine.store('stats', stats);
             Alpine.store('campaigns', Array.isArray(campaigns) ? campaigns : []);
             Alpine.store('deals', Array.isArray(deals) ? deals : []);
             Alpine.store('contacts', Array.isArray(contacts) ? contacts : []);
             Alpine.store('templates', Array.isArray(templates) ? templates : []);
-
             log(`Data loaded: ${stats.total} contacts, ${deals.length} deals, ${campaigns.length} campaigns`);
         } catch (e) {
             log('Failed to load data: ' + e.message);
         }
     };
 
-    // ---------- Global functions for Alpine ----------
+    // Hygiene functions
+    window.runValidation = async function() {
+        const alpine = Alpine.$data(document.querySelector('[x-data*="activeNav"]'));
+        if (!alpine) return;
+        alpine.isValidating = true;
+        try {
+            const result = await apiCall('validateAllEmails');
+            log(`DNS validation complete: ${result.validated} contacts checked.`);
+            const stats = await apiCall('getStatus');
+            Alpine.store('stats', stats);
+        } catch (e) {
+            log('Validation error: ' + e.message);
+            alert('Validation failed: ' + e.message);
+        } finally {
+            alpine.isValidating = false;
+        }
+    };
+
+    window.runBounceClean = async function() {
+        const alpine = Alpine.$data(document.querySelector('[x-data*="activeNav"]'));
+        if (!alpine) return;
+        alpine.isCleaning = true;
+        try {
+            const result = await apiCall('scanAndCleanBounces');
+            log(`Bounce clean complete: ${result.cleaned} contacts marked as bounced.`);
+            const stats = await apiCall('getStatus');
+            Alpine.store('stats', stats);
+        } catch (e) {
+            log('Bounce clean error: ' + e.message);
+            alert('Bounce clean failed: ' + e.message);
+        } finally {
+            alpine.isCleaning = false;
+        }
+    };
+
+    // Other actions (identical to previous version)
     window.saveDeal = async function() {
         const newDeal = {
             id: Date.now().toString(),
@@ -851,7 +815,6 @@
         };
         try {
             await apiCall('saveDeal', { deal: newDeal });
-            // Refresh deals list
             const deals = await apiCall('getDeals');
             Alpine.store('deals', deals);
             log('Deal created and synced');
@@ -901,10 +864,9 @@
         try {
             await apiCall('saveCampaign', { campaign: newCampaign });
             log('Campaign saved');
-            // Refresh campaigns list
             const campaigns = await apiCall('getCampaigns');
             Alpine.store('campaigns', campaigns);
-            Alpine.store('alpine').activeNav = 'campaigns';
+            Alpine.$data(document.querySelector('[x-data*="activeNav"]')).activeNav = 'campaigns';
         } catch(e) {
             console.error(e);
             alert('Failed to save campaign: ' + e.message);
@@ -921,7 +883,6 @@
         try {
             await apiCall('saveTemplate', { template: { name, subject, body, category } });
             log('Template saved');
-            // Refresh templates list
             const templates = await apiCall('getTemplates');
             Alpine.store('templates', templates);
         } catch(e) {
@@ -1006,9 +967,9 @@
         if (logsEl) logsEl.innerHTML = `> ${new Date().toLocaleTimeString()}: ${msg}<br>` + logsEl.innerHTML;
     };
 
-    // ---------- Load settings from localStorage ----------
+    // Load settings from localStorage
     window.addEventListener('load', () => {
-        const defaultUrl = 'https://script.google.com/macros/s/AKfycby_M2yiFcD6sIev_F6ATl8kf_qB3AXR9I-DJvugVTHWEmYHEuE-OI3QI--helvev23GkQ/exec'; // 🔁 REPLACE WITH YOUR DEPLOYED URL
+        const defaultUrl = 'https://script.google.com/macros/s/AKfycby_M2yiFcD6sIev_F6ATl8kf_qB3AXR9I-DJvugVTHWEmYHEuE-OI3QI--helvev23GkQ/exec'; // REPLACE WITH YOUR DEPLOYED URL
         document.getElementById('conf-gas-url').value = localStorage.getItem('rave_conf-gas-url') || defaultUrl;
         document.getElementById('conf-master-key').value = localStorage.getItem('rave_conf-master-key') || '';
         document.getElementById('conf-sender-name').value = localStorage.getItem('rave_conf-sender-name') || 'Raveone Consultants';
@@ -1022,8 +983,7 @@
     });
 </script>
 
-<!-- Optional: logs container (add to dashboard later if desired) -->
+<!-- hidden logs container -->
 <div id="logs" style="display: none;"></div>
-
 </body>
 </html>
